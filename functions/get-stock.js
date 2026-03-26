@@ -22,7 +22,12 @@ export async function handler(event) {
       statusCode,
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "public, max-age=30",
+
+        // 省流量核心：
+        // max-age=10 讓瀏覽器可短暫快取 10 秒
+        // s-maxage=30 讓 CDN/代理可快取 30 秒
+        // stale-while-revalidate=60 可先回舊資料再背景更新
+        "Cache-Control": "public, max-age=10, s-maxage=30, stale-while-revalidate=60",
       },
       body: JSON.stringify(data, null, 2),
     };
@@ -80,22 +85,18 @@ export async function handler(event) {
     };
   }
 
-  function formatTaipeiTime(date) {
-    return new Intl.DateTimeFormat("zh-TW", {
-      timeZone: "Asia/Taipei",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    }).format(date);
-  }
-
   const fetchedAtDate = new Date();
   const fetchedAt = fetchedAtDate.toISOString();
-  const fetchedAtTaipei = formatTaipeiTime(fetchedAtDate);
+  const fetchedAtTaipei = new Intl.DateTimeFormat("zh-TW", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(fetchedAtDate);
 
   if (!shop || !clientId || !clientSecret) {
     return jsonResponse(500, {
@@ -187,7 +188,7 @@ export async function handler(event) {
 
     const inventoryItemId = matchedVariant.inventory_item_id;
 
-    // 3. 查該 inventory item 的各門市庫存
+    // 3. 查各門市庫存
     const levelsRes = await fetch(
       `https://${shop}/admin/api/2026-01/inventory_levels.json?inventory_item_ids=${inventoryItemId}`,
       {
@@ -248,18 +249,24 @@ export async function handler(event) {
 
     const totalStatus = getTotalStatus(totalAvailable);
 
-    // 6. 警報邏輯
-    const alertLocations = locationStocks.filter((loc) => loc.available <= 1);
+    // 6. 導購式提醒
+    const availableStores = locationStocks.filter((loc) => loc.available > 0);
+    const soldOutStores = locationStocks.filter((loc) => loc.available <= 0);
 
-    const alertMessage =
-      alertLocations.length > 0
-        ? `⚠ ${alertLocations
-            .map((loc) => {
-              const shortName = loc.location_name.replace("花蓮｜", "");
-              return `${shortName} 剩 ${loc.available} 盒`;
-            })
-            .join("、")}`
-        : null;
+    let alertMessage = null;
+
+    if (availableStores.length === 0) {
+      alertMessage = "今天兩間門市都被吃光光了…";
+    } else if (soldOutStores.length > 0 && availableStores.length > 0) {
+      const availableNames = availableStores.map((loc) =>
+        loc.location_name.replace("花蓮｜", "")
+      );
+      const soldOutNames = soldOutStores.map((loc) =>
+        loc.location_name.replace("花蓮｜", "")
+      );
+
+      alertMessage = `⚠ ${soldOutNames.join("、")} 被吃光了，現在只剩 ${availableNames.join("、")} 還有。`;
+    }
 
     return jsonResponse(200, {
       success: true,
@@ -278,7 +285,7 @@ export async function handler(event) {
         total_status: totalStatus.text,
         total_status_code: totalStatus.code,
         total_display_text: totalStatus.displayText,
-        alert: alertLocations.length > 0,
+        alert: Boolean(alertMessage),
         alert_message: alertMessage,
         locations: locationStocks,
         updated_at: matchedProduct.updated_at,
