@@ -80,9 +80,28 @@ export async function handler(event) {
     };
   }
 
+  function formatTaipeiTime(date) {
+    return new Intl.DateTimeFormat("zh-TW", {
+      timeZone: "Asia/Taipei",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(date);
+  }
+
+  const fetchedAtDate = new Date();
+  const fetchedAt = fetchedAtDate.toISOString();
+  const fetchedAtTaipei = formatTaipeiTime(fetchedAtDate);
+
   if (!shop || !clientId || !clientSecret) {
     return jsonResponse(500, {
       error: "Missing required environment variables",
+      fetched_at: fetchedAt,
+      fetched_at_taipei: fetchedAtTaipei,
     });
   }
 
@@ -106,6 +125,8 @@ export async function handler(event) {
       return jsonResponse(tokenRes.status, {
         error: "Failed to get access token",
         details: tokenData,
+        fetched_at: fetchedAt,
+        fetched_at_taipei: fetchedAtTaipei,
       });
     }
 
@@ -129,6 +150,8 @@ export async function handler(event) {
       return jsonResponse(productsRes.status, {
         error: "Failed to fetch products",
         details: productsData,
+        fetched_at: fetchedAt,
+        fetched_at_taipei: fetchedAtTaipei,
       });
     }
 
@@ -155,6 +178,8 @@ export async function handler(event) {
       return jsonResponse(200, {
         success: false,
         target_sku: targetSku,
+        fetched_at: fetchedAt,
+        fetched_at_taipei: fetchedAtTaipei,
         item: null,
         message: "SKU not found",
       });
@@ -180,6 +205,8 @@ export async function handler(event) {
       return jsonResponse(levelsRes.status, {
         error: "Failed to fetch inventory levels",
         details: levelsData,
+        fetched_at: fetchedAt,
+        fetched_at_taipei: fetchedAtTaipei,
       });
     }
 
@@ -237,6 +264,8 @@ export async function handler(event) {
     return jsonResponse(200, {
       success: true,
       target_sku: targetSku,
+      fetched_at: fetchedAt,
+      fetched_at_taipei: fetchedAtTaipei,
       item: {
         sku: matchedVariant.sku,
         title: matchedProduct.title,
@@ -259,6 +288,8 @@ export async function handler(event) {
     return jsonResponse(500, {
       error: "Unexpected server error",
       message: error.message,
+      fetched_at: fetchedAt,
+      fetched_at_taipei: fetchedAtTaipei,
     });
   }
 }
