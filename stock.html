@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>今日榴槤庫存</title>
+  <style>
+    :root {
+      --bg: #fffdf7;
+      --card: #ffffff;
+      --text: #2b2b2b;
+      --sub: #6b6b6b;
+      --line: #ece7d8;
+      --brand: #f4d35e;
+      --ok: #2e7d32;
+      --warn: #ef6c00;
+      --out: #c62828;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #fff6cc 0%, #fffdf7 100%);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 24px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #fff3b0;
+      color: #7a5b00;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: var(--sub);
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 600;
+    }
+
+    .alert {
+      margin-top: 14px;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .alert.warn {
+      background: #fff3e0;
+      color: var(--warn);
+      border: 1px solid #ffd8a8;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      box-shadow: var(--shadow);
+      margin-top: 14px;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .location-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .location-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fffefb;
+    }
+
+    .location-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .location-name {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .status-tag {
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .status-in_stock {
+      color: var(--ok);
+      background: #e8f5e9;
+    }
+
+    .status-low_stock {
+      color: var(--warn);
+      background: #fff3e0;
+    }
+
+    .status-out_of_stock {
+      color: var(--out);
+      background: #ffebee;
+    }
+
+    .display-text {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--sub);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .loading,
+    .error {
+      text-align: center;
+      padding: 36px 18px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: var(--shadow);
+      margin-top: 20px;
+    }
+
+    .error {
+      color: var(--out);
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="app">
+      <div class="loading">載入今日榴槤庫存中...</div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_SKU = "DUR-FF-001";
+
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function loadStock() {
+      const app = document.getElementById("app");
+      const sku = getQueryParam("sku") || DEFAULT_SKU;
+
+      try {
+        const res = await fetch(`/.netlify/functions/get-stock?sku=${encodeURIComponent(sku)}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.success || !data.item) {
+          app.innerHTML = `
+            <div class="error">
+              目前無法取得商品庫存資料。<br>
+              SKU：${escapeHtml(sku)}
+            </div>
+          `;
+          return;
+        }
+
+        const item = data.item;
+        const locations = Array.isArray(item.locations) ? item.locations : [];
+        const alertBox = item.alert && item.alert_message
+          ? `<div class="alert warn">${escapeHtml(item.alert_message)}</div>`
+          : "";
+
+        const locationHtml = locations.map(loc => {
+          const statusClass = `status-${escapeHtml(loc.status_code)}`;
+          return `
+            <div class="location-item">
+              <div class="location-head">
+                <h3 class="location-name">${escapeHtml(loc.location_name)}</h3>
+                <span class="status-tag ${statusClass}">${escapeHtml(loc.status)}</span>
+              </div>
+              <p class="display-text">${escapeHtml(loc.display_text)}</p>
+              <div class="meta">庫存更新：${escapeHtml(loc.updated_at || "-")}</div>
+            </div>
+          `;
+        }).join("");
+
+        app.innerHTML = `
+          <div class="hero">
+            <div class="badge">榴槤刺蝟 Nice Durian</div>
+            <h1>${escapeHtml(item.title)}</h1>
+            <div class="subtitle">即時門市庫存查詢</div>
+
+            <div class="summary">
+              <div class="pill">SKU：${escapeHtml(data.target_sku)}</div>
+              <div class="pill">${escapeHtml(item.total_display_text)}</div>
+              <div class="pill">${escapeHtml(item.total_status)}</div>
+            </div>
+
+            ${alertBox}
+          </div>
+
+          <div class="card">
+            <h2 class="section-title">門市庫存</h2>
+            <div class="location-list">
+              ${locationHtml}
+            </div>
+          </div>
+
+          <div class="footer">
+            本次查詢時間：${escapeHtml(data.fetched_at_taipei || "-")}<br>
+            商品資料更新：${escapeHtml(item.updated_at || "-")}
+          </div>
+        `;
+      } catch (error) {
+        app.innerHTML = `
+          <div class="error">
+            載入失敗，請稍後再試。<br>
+            ${escapeHtml(error.message)}
+          </div>
+        `;
+      }
+    }
+
+    loadStock();
+  </script>
+</body>
+</html>
