@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>榴槤刺蝟｜今日庫存</title>
+  <title>榴槤刺蝟｜榴槤即時供應雷達</title>
   <style>
     :root {
       --bg: #fffdf8;
@@ -254,7 +254,7 @@
 <body>
   <div class="wrap">
     <div id="app">
-      <div class="loading">榴槤庫存感應中…</div>
+      <div class="loading">榴槤供應雷達感應中…</div>
     </div>
   </div>
 
@@ -275,6 +275,14 @@
         .replaceAll("'", "&#039;");
     }
 
+    function formatDisplayTime(raw) {
+      if (!raw) return "-";
+      return String(raw)
+        .replace("T", " ")
+        .replace("+08:00", "")
+        .replace("Z", "");
+    }
+
     function getStoreFlavor(loc) {
       const qty = Number(loc.available) || 0;
 
@@ -288,7 +296,7 @@
       if (qty <= 3) {
         return {
           title: `剩 ${qty} 盒`,
-          sub: "快被吃光了，真的要快。",
+          sub: "真的快被吃光了。",
         };
       }
 
@@ -320,7 +328,7 @@
 
         return {
           className: "",
-          text: `⚠ ${soldOutNames.join("、")} 被吃光了，快去 ${availableNames.join("、")} 搶最後的！`,
+          text: `⚠ ${soldOutNames.join("、")} 被吃光了，現在只剩 ${availableNames.join("、")} 還有。`,
         };
       }
 
@@ -362,7 +370,7 @@
               </div>
               <div class="stock-main">${escapeHtml(flavor.title)}</div>
               <p class="stock-copy">${escapeHtml(flavor.sub)}</p>
-              <div class="meta">最後更新：${escapeHtml(loc.updated_at || "-")}</div>
+              <div class="meta">最後更新：${escapeHtml(formatDisplayTime(loc.updated_at || "-"))}</div>
             </div>
           `;
         }).join("");
@@ -371,7 +379,7 @@
           <div class="hero">
             <div class="brand-chip">榴槤刺蝟 Nice Durian</div>
             <h1>${escapeHtml(item.title)}</h1>
-            <div class="hero-sub">即時門市庫存查詢</div>
+            <div class="hero-sub">榴槤即時供應雷達</div>
 
             <div class="summary">
               <div class="pill">${escapeHtml(item.total_display_text)}</div>
@@ -390,14 +398,13 @@
           </div>
 
           <div class="footer">
-            最後查詢時間：${escapeHtml(data.fetched_at_taipei || "-")}<br>
-            （資料會持續更新，請以頁面顯示為準）
+            更新時間：${escapeHtml(data.fetched_at_taipei || "-")}
           </div>
         `;
       } catch (error) {
         app.innerHTML = `
           <div class="error">
-            庫存感應失敗，請稍後再試。<br>
+            供應雷達暫時失靈，請稍後再試。<br>
             ${escapeHtml(error.message)}
           </div>
         `;
