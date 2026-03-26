@@ -22,6 +22,7 @@ export async function handler() {
   }
 
   try {
+    // 1. 先取得 access token
     const tokenRes = await fetch(`https://${shop}/admin/oauth/access_token`, {
       method: "POST",
       headers: {
@@ -53,12 +54,15 @@ export async function handler() {
       };
     }
 
+    const accessToken = tokenData.access_token;
+
+    // 2. 抓全部商品，先找出目標 SKU 對應的商品與 inventory_item_id
     const productsRes = await fetch(
       `https://${shop}/admin/api/2026-01/products.json`,
       {
         method: "GET",
         headers: {
-          "X-Shopify-Access-Token": tokenData.access_token,
+          "X-Shopify-Access-Token": accessToken,
           "Content-Type": "application/json; charset=utf-8",
         },
       }
@@ -85,29 +89,126 @@ export async function handler() {
 
     const products = productsData.products || [];
 
-    let matchedItem = null;
+    let matchedProduct = null;
+    let matchedVariant = null;
 
     for (const product of products) {
       const variants = product.variants || [];
 
       for (const variant of variants) {
         if (variant.sku === targetSku) {
-          matchedItem = {
-            sku: variant.sku,
-            title: product.title,
-            variant_title: variant.title,
-            stock: variant.inventory_quantity,
-            product_id: product.id,
-            variant_id: variant.id,
-            product_handle: product.handle,
-            updated_at: product.updated_at,
-          };
+          matchedProduct = product;
+          matchedVariant = variant;
           break;
         }
       }
 
-      if (matchedItem) break;
+      if (matchedVariant) break;
     }
+
+    if (!matchedProduct || !matchedVariant) {
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(
+          {
+            success: true,
+            target_sku: targetSku,
+            item: null,
+            message: "SKU not found",
+          },
+          null,
+          2
+        ),
+      };
+    }
+
+    const inventoryItemId = matchedVariant.inventory_item_id;
+
+    // 3. 查這個 inventory item 在各 location 的庫存
+    const levelsRes = await fetch(
+      `https://${shop}/admin/api/2026-01/inventory_levels.json?inventory_item_ids=${inventoryItemId}`,
+      {
+        method: "GET",
+        headers: {
+          "X-Shopify-Access-Token": accessToken,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    );
+
+    const levelsData = await levelsRes.json();
+
+    if (!levelsRes.ok) {
+      return {
+        statusCode: levelsRes.status,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(
+          {
+            error: "Failed to fetch inventory levels",
+            details: levelsData,
+          },
+          null,
+          2
+        ),
+      };
+    }
+
+    const inventoryLevels = levelsData.inventory_levels || [];
+
+    // 4. 抓 location 清單，把 location_id 對應成 location_name
+    const locationsRes = await fetch(
+      `https://${shop}/admin/api/2026-01/locations.json`,
+      {
+        method: "GET",
+        headers: {
+          "X-Shopify-Access-Token": accessToken,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    );
+
+    const locationsData = await locationsRes.json();
+
+    if (!locationsRes.ok) {
+      return {
+        statusCode: locationsRes.status,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(
+          {
+            error: "Failed to fetch locations",
+            details: locationsData,
+          },
+          null,
+          2
+        ),
+      };
+    }
+
+    const locations = locationsData.locations || [];
+
+    const locationMap = {};
+    for (const location of locations) {
+      locationMap[location.id] = location.name;
+    }
+
+    const locationStocks = inventoryLevels.map((level) => ({
+      location_id: level.location_id,
+      location_name: locationMap[level.location_id] || `Location ${level.location_id}`,
+      available: level.available,
+      updated_at: level.updated_at,
+    }));
+
+    const totalAvailable = locationStocks.reduce(
+      (sum, loc) => sum + (Number(loc.available) || 0),
+      0
+    );
 
     return {
       statusCode: 200,
@@ -118,7 +219,18 @@ export async function handler() {
         {
           success: true,
           target_sku: targetSku,
-          item: matchedItem,
+          item: {
+            sku: matchedVariant.sku,
+            title: matchedProduct.title,
+            variant_title: matchedVariant.title,
+            product_id: matchedProduct.id,
+            variant_id: matchedVariant.id,
+            inventory_item_id: inventoryItemId,
+            product_handle: matchedProduct.handle,
+            total_available: totalAvailable,
+            locations: locationStocks,
+            updated_at: matchedProduct.updated_at,
+          },
         },
         null,
         2
