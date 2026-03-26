@@ -6,9 +6,16 @@ export async function handler() {
   if (!shop || !clientId || !clientSecret) {
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: "Missing required environment variables",
-      }),
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: JSON.stringify(
+        {
+          error: "Missing required environment variables",
+        },
+        null,
+        2
+      ),
     };
   }
 
@@ -30,10 +37,17 @@ export async function handler() {
     if (!tokenRes.ok || !tokenData.access_token) {
       return {
         statusCode: tokenRes.status,
-        body: JSON.stringify({
-          error: "Failed to get access token",
-          details: tokenData,
-        }),
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(
+          {
+            error: "Failed to get access token",
+            details: tokenData,
+          },
+          null,
+          2
+        ),
       };
     }
 
@@ -43,7 +57,7 @@ export async function handler() {
         method: "GET",
         headers: {
           "X-Shopify-Access-Token": tokenData.access_token,
-          "Content-Type": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
         },
       }
     );
@@ -53,27 +67,41 @@ export async function handler() {
     if (!productsRes.ok) {
       return {
         statusCode: productsRes.status,
-        body: JSON.stringify({
-          error: "Failed to fetch products",
-          details: productsData,
-        }),
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(
+          {
+            error: "Failed to fetch products",
+            details: productsData,
+          },
+          null,
+          2
+        ),
       };
     }
 
     return {
       statusCode: 200,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
       },
-      body: JSON.stringify(productsData),
+      body: JSON.stringify(productsData, null, 2),
     };
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: "Unexpected server error",
-        message: error.message,
-      }),
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: JSON.stringify(
+        {
+          error: "Unexpected server error",
+          message: error.message,
+        },
+        null,
+        2
+      ),
     };
   }
 }
