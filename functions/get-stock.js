@@ -5,63 +5,6 @@ export async function handler() {
 
   const targetSku = "DUR-FF-001";
 
-  const LOCATION_MAP = {
-    81993564354: "花蓮｜美崙起源",
-    82225496258: "花蓮｜花創園區",
-  };
-
-  function getStockStatus(available) {
-    const qty = Number(available) || 0;
-
-    if (qty <= 0) {
-      return {
-        status: "已售完",
-        status_code: "sold_out",
-        display_text: "已售完",
-      };
-    }
-
-    if (qty <= 3) {
-      return {
-        status: "即將售完",
-        status_code: "low_stock",
-        display_text: `剩 ${qty} 盒`,
-      };
-    }
-
-    return {
-      status: "庫存充足",
-      status_code: "in_stock",
-      display_text: `剩 ${qty} 盒`,
-    };
-  }
-
-  function getTotalStatus(total) {
-    const qty = Number(total) || 0;
-
-    if (qty <= 0) {
-      return {
-        status: "已售完",
-        status_code: "sold_out",
-        display_text: "全門市已售完",
-      };
-    }
-
-    if (qty <= 3) {
-      return {
-        status: "即將售完",
-        status_code: "low_stock",
-        display_text: `全門市剩 ${qty} 盒`,
-      };
-    }
-
-    return {
-      status: "庫存充足",
-      status_code: "in_stock",
-      display_text: `全門市剩 ${qty} 盒`,
-    };
-  }
-
   if (!shop || !clientId || !clientSecret) {
     return {
       statusCode: 500,
@@ -69,9 +12,7 @@ export async function handler() {
         "Content-Type": "application/json; charset=utf-8",
       },
       body: JSON.stringify(
-        {
-          error: "Missing required environment variables",
-        },
+        { error: "Missing required environment variables" },
         null,
         2
       ),
@@ -79,7 +20,7 @@ export async function handler() {
   }
 
   try {
-    // 1. 取得 access token
+    // 1️⃣ 取得 token
     const tokenRes = await fetch(`https://${shop}/admin/oauth/access_token`, {
       method: "POST",
       headers: {
@@ -93,152 +34,117 @@ export async function handler() {
     });
 
     const tokenData = await tokenRes.json();
-
-    if (!tokenRes.ok || !tokenData.access_token) {
-      return {
-        statusCode: tokenRes.status,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(
-          {
-            error: "Failed to get access token",
-            details: tokenData,
-          },
-          null,
-          2
-        ),
-      };
-    }
-
     const accessToken = tokenData.access_token;
 
-    // 2. 抓商品資料
+    // 2️⃣ 找 SKU
     const productsRes = await fetch(
       `https://${shop}/admin/api/2026-01/products.json`,
       {
-        method: "GET",
         headers: {
           "X-Shopify-Access-Token": accessToken,
-          "Content-Type": "application/json; charset=utf-8",
         },
       }
     );
 
     const productsData = await productsRes.json();
-
-    if (!productsRes.ok) {
-      return {
-        statusCode: productsRes.status,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(
-          {
-            error: "Failed to fetch products",
-            details: productsData,
-          },
-          null,
-          2
-        ),
-      };
-    }
-
     const products = productsData.products || [];
 
     let matchedProduct = null;
     let matchedVariant = null;
 
     for (const product of products) {
-      const variants = product.variants || [];
-
-      for (const variant of variants) {
+      for (const variant of product.variants || []) {
         if (variant.sku === targetSku) {
           matchedProduct = product;
           matchedVariant = variant;
           break;
         }
       }
-
       if (matchedVariant) break;
     }
 
-    if (!matchedProduct || !matchedVariant) {
+    if (!matchedVariant) {
       return {
         statusCode: 200,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(
-          {
-            success: true,
-            target_sku: targetSku,
-            item: null,
-            message: "SKU not found",
-          },
-          null,
-          2
-        ),
+        body: JSON.stringify({ success: false, message: "SKU not found" }),
       };
     }
 
     const inventoryItemId = matchedVariant.inventory_item_id;
 
-    // 3. 查庫存分布
+    // 3️⃣ 查庫存
     const levelsRes = await fetch(
       `https://${shop}/admin/api/2026-01/inventory_levels.json?inventory_item_ids=${inventoryItemId}`,
       {
-        method: "GET",
         headers: {
           "X-Shopify-Access-Token": accessToken,
-          "Content-Type": "application/json; charset=utf-8",
         },
       }
     );
 
     const levelsData = await levelsRes.json();
-
-    if (!levelsRes.ok) {
-      return {
-        statusCode: levelsRes.status,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(
-          {
-            error: "Failed to fetch inventory levels",
-            details: levelsData,
-          },
-          null,
-          2
-        ),
-      };
-    }
-
     const inventoryLevels = levelsData.inventory_levels || [];
 
+    // ⭐ 手動門市 mapping（避免權限問題）
+    const LOCATION_MAP = {
+      81993564354: "花蓮｜美崙起源",
+      82225496258: "花蓮｜花創園區",
+    };
+
+    // ⭐ 固定排序
+    const ORDER = [
+      "花蓮｜美崙起源",
+      "花蓮｜花創園區",
+    ];
+
+    // ⭐ 狀態判斷
+    function getStatus(stock) {
+      if (stock === 0) {
+        return { text: "已售完", code: "out_of_stock" };
+      }
+      if (stock <= 3) {
+        return { text: "即將售完", code: "low_stock" };
+      }
+      return { text: "庫存充足", code: "in_stock" };
+    }
+
     const locationStocks = inventoryLevels.map((level) => {
-      const available = Number(level.available) || 0;
-      const stockStatus = getStockStatus(available);
+      const stock = Number(level.available) || 0;
+      const status = getStatus(stock);
 
       return {
         location_id: level.location_id,
         location_name:
-          LOCATION_MAP[level.location_id] || `未知門市(${level.location_id})`,
-        available,
-        status: stockStatus.status,
-        status_code: stockStatus.status_code,
-        display_text: stockStatus.display_text,
+          LOCATION_MAP[level.location_id] ||
+          `Location ${level.location_id}`,
+        available: stock,
+        status: status.text,
+        status_code: status.code,
+        display_text:
+          stock === 0 ? "已售完" : `剩 ${stock} 盒`,
         updated_at: level.updated_at,
       };
     });
 
-    const totalAvailable = locationStocks.reduce(
-      (sum, loc) => sum + (Number(loc.available) || 0),
+    // ⭐ 排序
+    locationStocks.sort(
+      (a, b) =>
+        ORDER.indexOf(a.location_name) -
+        ORDER.indexOf(b.location_name)
+    );
+
+    // ⭐ 總庫存
+    const total = locationStocks.reduce(
+      (sum, loc) => sum + loc.available,
       0
     );
 
-    const totalStatus = getTotalStatus(totalAvailable);
+    const totalStatus = getStatus(total);
+
+    // ⭐ 警報
+    const alertLocations = locationStocks.filter(
+      (loc) => loc.available <= 1
+    );
 
     return {
       statusCode: 200,
@@ -250,19 +156,25 @@ export async function handler() {
           success: true,
           target_sku: targetSku,
           item: {
-            sku: matchedVariant.sku,
             title: matchedProduct.title,
-            variant_title: matchedVariant.title,
-            product_id: matchedProduct.id,
-            variant_id: matchedVariant.id,
-            inventory_item_id: inventoryItemId,
-            product_handle: matchedProduct.handle,
-            total_available: totalAvailable,
-            total_status: totalStatus.status,
-            total_status_code: totalStatus.status_code,
-            total_display_text: totalStatus.display_text,
+            total_available: total,
+            total_status: totalStatus.text,
+            total_status_code: totalStatus.code,
+            total_display_text:
+              total === 0
+                ? "全門市已售完"
+                : `全門市剩 ${total} 盒`,
+
+            // 🔥 警報
+            alert: alertLocations.length > 0,
+            alert_message:
+              alertLocations.length > 0
+                ? `${alertLocations
+                    .map((l) => l.location_name)
+                    .join("、")} 即將售完`
+                : null,
+
             locations: locationStocks,
-            updated_at: matchedProduct.updated_at,
           },
         },
         null,
@@ -272,17 +184,9 @@ export async function handler() {
   } catch (error) {
     return {
       statusCode: 500,
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: JSON.stringify(
-        {
-          error: "Unexpected server error",
-          message: error.message,
-        },
-        null,
-        2
-      ),
+      body: JSON.stringify({
+        error: error.message,
+      }),
     };
   }
 }
