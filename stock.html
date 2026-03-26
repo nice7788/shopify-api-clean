@@ -260,6 +260,8 @@
 
   <script>
     const DEFAULT_SKU = "DUR-FF-001";
+    const CACHE_TTL_MS = 30 * 1000; // 30 秒
+    const CACHE_PREFIX = "durian-stock-cache:";
 
     function getQueryParam(name) {
       const url = new URL(window.location.href);
@@ -338,12 +340,107 @@
       };
     }
 
+    function getCacheKey(sku) {
+      return `${CACHE_PREFIX}${sku}`;
+    }
+
+    function readCache(sku) {
+      try {
+        const raw = localStorage.getItem(getCacheKey(sku));
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.savedAt || !parsed.data) return null;
+
+        const age = Date.now() - parsed.savedAt;
+        if (age > CACHE_TTL_MS) return null;
+
+        return parsed.data;
+      } catch {
+        return null;
+      }
+    }
+
+    function writeCache(sku, data) {
+      try {
+        localStorage.setItem(
+          getCacheKey(sku),
+          JSON.stringify({
+            savedAt: Date.now(),
+            data,
+          })
+        );
+      } catch {
+        // localStorage 滿了或不可用時，直接忽略
+      }
+    }
+
+    function renderPage(data) {
+      const app = document.getElementById("app");
+      const item = data.item;
+      const locations = Array.isArray(item.locations) ? item.locations : [];
+      const heroGuide = getHeroGuide(item);
+
+      const locationHtml = locations.map((loc) => {
+        const flavor = getStoreFlavor(loc);
+        return `
+          <div class="location-card">
+            <div class="location-top">
+              <h3 class="location-name">${escapeHtml(loc.location_name)}</h3>
+              <span class="tag ${escapeHtml(loc.status_code)}">${escapeHtml(loc.status)}</span>
+            </div>
+            <div class="stock-main">${escapeHtml(flavor.title)}</div>
+            <p class="stock-copy">${escapeHtml(flavor.sub)}</p>
+            <div class="meta">最後更新：${escapeHtml(formatDisplayTime(loc.updated_at || "-"))}</div>
+          </div>
+        `;
+      }).join("");
+
+      app.innerHTML = `
+        <div class="hero">
+          <div class="brand-chip">榴槤刺蝟 Nice Durian</div>
+          <h1>${escapeHtml(item.title)}</h1>
+          <div class="hero-sub">榴槤即時供應雷達</div>
+
+          <div class="summary">
+            <div class="pill">${escapeHtml(item.total_display_text)}</div>
+          </div>
+
+          <div class="guide-box ${escapeHtml(heroGuide.className)}">
+            ${escapeHtml(heroGuide.text)}
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">門市庫存</h2>
+          <div class="location-list">
+            ${locationHtml}
+          </div>
+        </div>
+
+        <div class="footer">
+          更新時間：${escapeHtml(data.fetched_at_taipei || "-")}
+        </div>
+      `;
+    }
+
     async function loadStock() {
       const app = document.getElementById("app");
       const sku = getQueryParam("sku") || DEFAULT_SKU;
 
+      // 先讀本地快取
+      const cachedData = readCache(sku);
+      if (cachedData && cachedData.success && cachedData.item) {
+        renderPage(cachedData);
+        return;
+      }
+
       try {
-        const res = await fetch(`/.netlify/functions/get-stock?sku=${encodeURIComponent(sku)}`);
+        const res = await fetch(`/.netlify/functions/get-stock?sku=${encodeURIComponent(sku)}`, {
+          method: "GET",
+          cache: "default",
+        });
+
         const data = await res.json();
 
         if (!res.ok || !data.success || !data.item) {
@@ -356,51 +453,8 @@
           return;
         }
 
-        const item = data.item;
-        const locations = Array.isArray(item.locations) ? item.locations : [];
-        const heroGuide = getHeroGuide(item);
-
-        const locationHtml = locations.map((loc) => {
-          const flavor = getStoreFlavor(loc);
-          return `
-            <div class="location-card">
-              <div class="location-top">
-                <h3 class="location-name">${escapeHtml(loc.location_name)}</h3>
-                <span class="tag ${escapeHtml(loc.status_code)}">${escapeHtml(loc.status)}</span>
-              </div>
-              <div class="stock-main">${escapeHtml(flavor.title)}</div>
-              <p class="stock-copy">${escapeHtml(flavor.sub)}</p>
-              <div class="meta">最後更新：${escapeHtml(formatDisplayTime(loc.updated_at || "-"))}</div>
-            </div>
-          `;
-        }).join("");
-
-        app.innerHTML = `
-          <div class="hero">
-            <div class="brand-chip">榴槤刺蝟 Nice Durian</div>
-            <h1>${escapeHtml(item.title)}</h1>
-            <div class="hero-sub">榴槤即時供應雷達</div>
-
-            <div class="summary">
-              <div class="pill">${escapeHtml(item.total_display_text)}</div>
-            </div>
-
-            <div class="guide-box ${escapeHtml(heroGuide.className)}">
-              ${escapeHtml(heroGuide.text)}
-            </div>
-          </div>
-
-          <div class="section">
-            <h2 class="section-title">門市庫存</h2>
-            <div class="location-list">
-              ${locationHtml}
-            </div>
-          </div>
-
-          <div class="footer">
-            更新時間：${escapeHtml(data.fetched_at_taipei || "-")}
-          </div>
-        `;
+        writeCache(sku, data);
+        renderPage(data);
       } catch (error) {
         app.innerHTML = `
           <div class="error">
