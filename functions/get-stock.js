@@ -22,7 +22,6 @@ export async function handler() {
   }
 
   try {
-    // 1. 先取得 access token
     const tokenRes = await fetch(`https://${shop}/admin/oauth/access_token`, {
       method: "POST",
       headers: {
@@ -56,7 +55,6 @@ export async function handler() {
 
     const accessToken = tokenData.access_token;
 
-    // 2. 抓全部商品，先找出目標 SKU 對應的商品與 inventory_item_id
     const productsRes = await fetch(
       `https://${shop}/admin/api/2026-01/products.json`,
       {
@@ -127,7 +125,6 @@ export async function handler() {
 
     const inventoryItemId = matchedVariant.inventory_item_id;
 
-    // 3. 查這個 inventory item 在各 location 的庫存
     const levelsRes = await fetch(
       `https://${shop}/admin/api/2026-01/inventory_levels.json?inventory_item_ids=${inventoryItemId}`,
       {
@@ -160,47 +157,8 @@ export async function handler() {
 
     const inventoryLevels = levelsData.inventory_levels || [];
 
-    // 4. 抓 location 清單，把 location_id 對應成 location_name
-    const locationsRes = await fetch(
-      `https://${shop}/admin/api/2026-01/locations.json`,
-      {
-        method: "GET",
-        headers: {
-          "X-Shopify-Access-Token": accessToken,
-          "Content-Type": "application/json; charset=utf-8",
-        },
-      }
-    );
-
-    const locationsData = await locationsRes.json();
-
-    if (!locationsRes.ok) {
-      return {
-        statusCode: locationsRes.status,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(
-          {
-            error: "Failed to fetch locations",
-            details: locationsData,
-          },
-          null,
-          2
-        ),
-      };
-    }
-
-    const locations = locationsData.locations || [];
-
-    const locationMap = {};
-    for (const location of locations) {
-      locationMap[location.id] = location.name;
-    }
-
     const locationStocks = inventoryLevels.map((level) => ({
       location_id: level.location_id,
-      location_name: locationMap[level.location_id] || `Location ${level.location_id}`,
       available: level.available,
       updated_at: level.updated_at,
     }));
