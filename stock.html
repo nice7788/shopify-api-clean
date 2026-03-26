@@ -281,14 +281,14 @@
       if (qty <= 0) {
         return {
           title: "吃光光了…",
-          sub: "這裡今天被榴槤控搶先一步。",
+          sub: "今天真的被吃光光了…",
         };
       }
 
       if (qty <= 3) {
         return {
           title: `剩 ${qty} 盒`,
-          sub: "還有機會，想吃要快。",
+          sub: "快被吃光了，真的要快。",
         };
       }
 
@@ -311,11 +311,16 @@
       }
 
       if (soldOutStores.length > 0 && availableStores.length > 0) {
-        const availableNames = availableStores.map((loc) => loc.location_name.replace("花蓮｜", ""));
-        const soldOutNames = soldOutStores.map((loc) => loc.location_name.replace("花蓮｜", ""));
+        const availableNames = availableStores.map((loc) =>
+          loc.location_name.replace("花蓮｜", "")
+        );
+        const soldOutNames = soldOutStores.map((loc) =>
+          loc.location_name.replace("花蓮｜", "")
+        );
+
         return {
           className: "",
-          text: `⚠ ${soldOutNames.join("、")} 暫時吃光光了，建議前往 ${availableNames.join("、")}。`,
+          text: `⚠ ${soldOutNames.join("、")} 被吃光了，快去 ${availableNames.join("、")} 搶最後的！`,
         };
       }
 
@@ -357,7 +362,7 @@
               </div>
               <div class="stock-main">${escapeHtml(flavor.title)}</div>
               <p class="stock-copy">${escapeHtml(flavor.sub)}</p>
-              <div class="meta">庫存更新：${escapeHtml(loc.updated_at || "-")}</div>
+              <div class="meta">最後更新：${escapeHtml(loc.updated_at || "-")}</div>
             </div>
           `;
         }).join("");
@@ -370,7 +375,6 @@
 
             <div class="summary">
               <div class="pill">${escapeHtml(item.total_display_text)}</div>
-              <div class="pill">${escapeHtml(item.total_status)}</div>
             </div>
 
             <div class="guide-box ${escapeHtml(heroGuide.className)}">
@@ -386,8 +390,8 @@
           </div>
 
           <div class="footer">
-            本次查詢時間：${escapeHtml(data.fetched_at_taipei || "-")}<br>
-            商品資料更新：${escapeHtml(item.updated_at || "-")}
+            最後查詢時間：${escapeHtml(data.fetched_at_taipei || "-")}<br>
+            （資料會持續更新，請以頁面顯示為準）
           </div>
         `;
       } catch (error) {
