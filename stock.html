@@ -116,26 +116,6 @@
       margin-top: 4px;
     }
 
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .meta-chip {
-      display: inline-flex;
-      align-items: center;
-      min-height: 38px;
-      padding: 8px 12px;
-      background: rgba(255,255,255,0.72);
-      border: 1px solid #eadfca;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 800;
-      color: #5c5246;
-    }
-
     .guide-box {
       margin-top: 16px;
       border-radius: 18px;
@@ -405,10 +385,14 @@
     const CACHE_TTL_MS = 30 * 1000;
     const CACHE_PREFIX = "durian-stock-cache:";
 
-    // 之後有商品頁網址時，直接填入就能顯示「線上直接購買」
     const PRODUCT_URL_MAP = {
-      "DUR-FF-001": "",
+      "DUR-FF-001": "https://nicedurian.com/products/dur-ff-001",
       "COL-MR-004": ""
+    };
+
+    const STORE_URL_MAP = {
+      "花蓮｜美崙起源": "https://maps.app.goo.gl/Kzuxjo7p7Nzf1AB97?g_st=ic",
+      "花蓮｜花創園區": "https://maps.app.goo.gl/LWeLsQ4zJJqStBsk7?g_st=ic"
     };
 
     function getQueryParam(name) {
@@ -556,13 +540,13 @@
       showUpdateToast("✨ 已收進魔法袋");
     }
 
-    function getMapUrl(locationName) {
-      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
+    function getStoreUrl(locationName) {
+      return STORE_URL_MAP[locationName] || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
     }
 
     function renderStoreActions(loc, productUrl, itemTitle, sku) {
       const qty = Number(loc.available) || 0;
-      const mapUrl = getMapUrl(loc.location_name);
+      const storeUrl = getStoreUrl(loc.location_name);
 
       const magicBtn = `
         <button class="btn btn-secondary" type="button" onclick="openMagicBag('${escapeHtml(itemTitle)}', '${escapeHtml(sku)}')">
@@ -577,7 +561,7 @@
       if (qty <= 0) {
         return `
           <div class="cta-row">
-            <a class="btn btn-soft" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener noreferrer">看看門市位置</a>
+            <a class="btn btn-soft" href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer">看看門市位置</a>
             ${magicBtn}
             ${buyBtn}
           </div>
@@ -586,28 +570,19 @@
 
       return `
         <div class="cta-row">
-          <a class="btn btn-primary" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener noreferrer">前往這間門市</a>
+          <a class="btn btn-primary" href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer">前往這間門市</a>
           ${magicBtn}
           ${buyBtn}
         </div>
       `;
     }
 
-    function renderHeroActions(itemTitle, sku, productUrl) {
-      const magicBtn = `
-        <button class="btn btn-secondary" type="button" onclick="openMagicBag('${escapeHtml(itemTitle)}', '${escapeHtml(sku)}')">
-          收進魔法袋
-        </button>
-      `;
-
-      const buyBtn = productUrl
-        ? `<a class="btn btn-primary" href="${escapeHtml(productUrl)}" target="_blank" rel="noopener noreferrer">線上直接購買</a>`
-        : "";
+    function renderHeroActions(productUrl) {
+      if (!productUrl) return "";
 
       return `
         <div class="hero-actions">
-          ${magicBtn}
-          ${buyBtn}
+          <a class="btn btn-primary" href="${escapeHtml(productUrl)}" target="_blank" rel="noopener noreferrer">線上直接購買</a>
         </div>
       `;
     }
@@ -656,16 +631,11 @@
             <div class="hero-total-pill">${escapeHtml(item.total_display_text)}</div>
           </div>
 
-          <div class="hero-meta">
-            <div class="meta-chip">${escapeHtml(item.total_status)}</div>
-            <div class="meta-chip">更新時間：${escapeHtml(data.fetched_at_taipei || "-")}</div>
-          </div>
-
           <div class="guide-box ${escapeHtml(heroGuide.className)}">
             ${escapeHtml(heroGuide.text)}
           </div>
 
-          ${renderHeroActions(item.title, sku, productUrl)}
+          ${renderHeroActions(productUrl)}
         </div>
 
         <div class="section">
@@ -691,7 +661,6 @@
 
       const cachedData = readCache(sku);
 
-      // 先顯示快取（秒開）
       if (cachedData && cachedData.success && cachedData.item) {
         renderPage(cachedData);
       }
@@ -716,7 +685,6 @@
           return;
         }
 
-        // 背景更新後，如果資料不同就自動刷新
         if (!cachedData || cachedData.fetched_at !== data.fetched_at) {
           writeCache(sku, data);
           renderPage(data);
