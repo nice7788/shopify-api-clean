@@ -25,7 +25,6 @@
       --radius-xl: 28px;
       --radius-lg: 22px;
       --radius-md: 18px;
-      --radius-sm: 14px;
     }
 
     * {
@@ -282,13 +281,6 @@
       border: 1px solid #eadfca;
     }
 
-    .btn-disabled {
-      background: #f4f1ea;
-      color: #a59b8f;
-      border: 1px solid #ece5d8;
-      cursor: not-allowed;
-    }
-
     .meta {
       margin-top: 8px;
       font-size: 12px;
@@ -394,6 +386,8 @@
       "花蓮｜美崙起源": "https://maps.app.goo.gl/Kzuxjo7p7Nzf1AB97?g_st=ic",
       "花蓮｜花創園區": "https://maps.app.goo.gl/LWeLsQ4zJJqStBsk7?g_st=ic"
     };
+
+    const HOME_URL = "https://nicedurian.com";
 
     function getQueryParam(name) {
       const url = new URL(window.location.href);
@@ -518,52 +512,30 @@
       }, 2200);
     }
 
-    function openMagicBag(itemTitle, sku) {
-      const key = "durian-magic-bag";
-      let bag = [];
-
-      try {
-        bag = JSON.parse(localStorage.getItem(key)) || [];
-      } catch {
-        bag = [];
-      }
-
-      if (!bag.find((item) => item.sku === sku)) {
-        bag.push({
-          sku,
-          title: itemTitle,
-          savedAt: new Date().toISOString()
-        });
-      }
-
-      localStorage.setItem(key, JSON.stringify(bag));
-      showUpdateToast("✨ 已收進魔法袋");
+    function goToProductPage(sku) {
+      const url = PRODUCT_URL_MAP[sku] || HOME_URL;
+      window.open(url, "_blank", "noopener,noreferrer");
     }
 
     function getStoreUrl(locationName) {
       return STORE_URL_MAP[locationName] || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
     }
 
-    function renderStoreActions(loc, productUrl, itemTitle, sku) {
+    function renderStoreActions(loc, sku) {
       const qty = Number(loc.available) || 0;
       const storeUrl = getStoreUrl(loc.location_name);
 
       const magicBtn = `
-        <button class="btn btn-secondary" type="button" onclick="openMagicBag('${escapeHtml(itemTitle)}', '${escapeHtml(sku)}')">
+        <button class="btn btn-secondary" type="button" onclick="goToProductPage('${escapeHtml(sku)}')">
           收進魔法袋
         </button>
       `;
-
-      const buyBtn = productUrl
-        ? `<a class="btn btn-secondary" href="${escapeHtml(productUrl)}" target="_blank" rel="noopener noreferrer">線上直接購買</a>`
-        : "";
 
       if (qty <= 0) {
         return `
           <div class="cta-row">
             <a class="btn btn-soft" href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer">看看門市位置</a>
             ${magicBtn}
-            ${buyBtn}
           </div>
         `;
       }
@@ -572,17 +544,14 @@
         <div class="cta-row">
           <a class="btn btn-primary" href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer">前往這間門市</a>
           ${magicBtn}
-          ${buyBtn}
         </div>
       `;
     }
 
-    function renderHeroActions(productUrl) {
-      if (!productUrl) return "";
-
+    function renderHeroActions() {
       return `
         <div class="hero-actions">
-          <a class="btn btn-primary" href="${escapeHtml(productUrl)}" target="_blank" rel="noopener noreferrer">線上直接購買</a>
+          <a class="btn btn-primary" href="${escapeHtml(HOME_URL)}" target="_blank" rel="noopener noreferrer">探索榴槤宇宙</a>
         </div>
       `;
     }
@@ -593,16 +562,10 @@
       const sku = data.target_sku || DEFAULT_SKU;
       const locations = Array.isArray(item.locations) ? item.locations : [];
       const heroGuide = getHeroGuide(item);
-      const productUrl = PRODUCT_URL_MAP[sku] || "";
 
       const locationHtml = locations.map((loc) => {
         const flavor = getStoreFlavor(loc);
-        const actionsHtml = renderStoreActions(
-          loc,
-          productUrl,
-          item.title,
-          sku
-        );
+        const actionsHtml = renderStoreActions(loc, sku);
 
         return `
           <div class="location-card">
@@ -635,7 +598,7 @@
             ${escapeHtml(heroGuide.text)}
           </div>
 
-          ${renderHeroActions(productUrl)}
+          ${renderHeroActions()}
         </div>
 
         <div class="section">
