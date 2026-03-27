@@ -11,25 +11,33 @@
       --text: #2d2a26;
       --sub: #7a7368;
       --line: #efe4c8;
+      --hero-bg: linear-gradient(180deg, #fff4bf 0%, #fff9e7 100%);
       --ok-bg: #edf7ed;
       --ok-text: #2e7d32;
       --low-bg: #fff4e5;
       --low-text: #c77800;
       --out-bg: #fff0f0;
       --out-text: #c03b3b;
-      --hero-bg: linear-gradient(180deg, #fff4bf 0%, #fff9e7 100%);
+      --chip-bg: rgba(255,255,255,0.82);
+      --brand-bg: rgba(255, 236, 157, 0.78);
+      --brand-text: #7b6207;
       --shadow: 0 14px 34px rgba(80, 60, 20, 0.08);
       --radius-xl: 28px;
       --radius-lg: 22px;
       --radius-md: 18px;
+      --radius-sm: 14px;
     }
 
     * {
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+    }
+
+    body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", sans-serif;
       background:
         radial-gradient(circle at top left, #fff7cf 0%, transparent 30%),
@@ -42,7 +50,7 @@
     .wrap {
       max-width: 760px;
       margin: 0 auto;
-      padding: 22px 16px 40px;
+      padding: 22px 16px 44px;
     }
 
     .hero {
@@ -56,8 +64,9 @@
     .brand-chip {
       display: inline-flex;
       align-items: center;
-      background: rgba(255, 236, 157, 0.78);
-      color: #7b6207;
+      gap: 8px;
+      background: var(--brand-bg);
+      color: var(--brand-text);
       border-radius: 999px;
       padding: 8px 14px;
       font-size: 13px;
@@ -97,7 +106,7 @@
       align-items: center;
       min-height: 46px;
       padding: 10px 16px;
-      background: rgba(255,255,255,0.82);
+      background: var(--chip-bg);
       border: 1px solid #eadfca;
       border-radius: 999px;
       font-size: 15px;
@@ -105,6 +114,26 @@
       box-shadow: 0 4px 14px rgba(120, 100, 40, 0.04);
       white-space: nowrap;
       margin-top: 4px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid #eadfca;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #5c5246;
     }
 
     .guide-box {
@@ -130,6 +159,13 @@
       color: #c03b3b;
     }
 
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
     .section {
       margin-top: 18px;
       background: var(--card-white);
@@ -139,11 +175,25 @@
       padding: 20px 16px;
     }
 
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
     .section-title {
-      margin: 0 0 14px;
+      margin: 0;
       font-size: 17px;
       font-weight: 900;
       letter-spacing: 0.02em;
+    }
+
+    .section-sub {
+      font-size: 12px;
+      color: #8e8578;
+      white-space: nowrap;
     }
 
     .location-list {
@@ -209,12 +259,6 @@
       margin: 0;
     }
 
-    .meta {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #938b80;
-    }
-
     .cta-row {
       display: flex;
       flex-wrap: wrap;
@@ -234,7 +278,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.12s ease;
+      transition: transform 0.12s ease, opacity 0.12s ease;
     }
 
     .btn:active {
@@ -256,6 +300,19 @@
       background: #fff;
       color: #574d3d;
       border: 1px solid #eadfca;
+    }
+
+    .btn-disabled {
+      background: #f4f1ea;
+      color: #a59b8f;
+      border: 1px solid #ece5d8;
+      cursor: not-allowed;
+    }
+
+    .meta {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #938b80;
     }
 
     .footer {
@@ -281,6 +338,29 @@
       color: #b94141;
     }
 
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      background: rgba(45, 42, 38, 0.94);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
     @media (max-width: 640px) {
       .hero-head {
         flex-direction: column;
@@ -289,6 +369,13 @@
 
       .hero-total-pill {
         margin-top: 0;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .section-head {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 
@@ -311,11 +398,14 @@
     </div>
   </div>
 
+  <div id="update-toast" class="toast">✨ 已更新最新供應狀態</div>
+
   <script>
     const DEFAULT_SKU = "DUR-FF-001";
     const CACHE_TTL_MS = 30 * 1000;
     const CACHE_PREFIX = "durian-stock-cache:";
 
+    // 之後有商品頁網址時，直接填入就能顯示「線上直接購買」
     const PRODUCT_URL_MAP = {
       "DUR-FF-001": "",
       "COL-MR-004": ""
@@ -431,55 +521,93 @@
       } catch {}
     }
 
-    function openMagicBag() {
-      const title = document.title;
-      const text = "我把這顆榴槤收進魔法袋了，等等再回來看。";
-      const url = window.location.href;
+    function showUpdateToast(text = "✨ 已更新最新供應狀態") {
+      const el = document.getElementById("update-toast");
+      if (!el) return;
 
-      if (navigator.share) {
-        navigator.share({ title, text, url }).catch(() => {});
-        return;
+      el.textContent = text;
+      el.classList.add("show");
+
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        el.classList.remove("show");
+      }, 2200);
+    }
+
+    function openMagicBag(itemTitle, sku) {
+      const key = "durian-magic-bag";
+      let bag = [];
+
+      try {
+        bag = JSON.parse(localStorage.getItem(key)) || [];
+      } catch {
+        bag = [];
       }
 
-      navigator.clipboard.writeText(url).then(() => {
-        alert("連結已收進魔法袋，可以貼給自己或朋友。");
-      }).catch(() => {
-        alert(url);
-      });
+      if (!bag.find((item) => item.sku === sku)) {
+        bag.push({
+          sku,
+          title: itemTitle,
+          savedAt: new Date().toISOString()
+        });
+      }
+
+      localStorage.setItem(key, JSON.stringify(bag));
+      showUpdateToast("✨ 已收進魔法袋");
     }
 
     function getMapUrl(locationName) {
       return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
     }
 
-    function renderStoreActions(loc, productUrl) {
+    function renderStoreActions(loc, productUrl, itemTitle, sku) {
       const qty = Number(loc.available) || 0;
       const mapUrl = getMapUrl(loc.location_name);
 
       const magicBtn = `
-        <button class="btn btn-secondary" type="button" onclick="openMagicBag()">
+        <button class="btn btn-secondary" type="button" onclick="openMagicBag('${escapeHtml(itemTitle)}', '${escapeHtml(sku)}')">
           收進魔法袋
         </button>
       `;
+
+      const buyBtn = productUrl
+        ? `<a class="btn btn-secondary" href="${escapeHtml(productUrl)}" target="_blank" rel="noopener noreferrer">線上直接購買</a>`
+        : "";
 
       if (qty <= 0) {
         return `
           <div class="cta-row">
             <a class="btn btn-soft" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener noreferrer">看看門市位置</a>
             ${magicBtn}
+            ${buyBtn}
           </div>
         `;
       }
-
-      const productBtn = productUrl
-        ? `<a class="btn btn-secondary" href="${escapeHtml(productUrl)}" target="_blank" rel="noopener noreferrer">線上直接購買</a>`
-        : "";
 
       return `
         <div class="cta-row">
           <a class="btn btn-primary" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener noreferrer">前往這間門市</a>
           ${magicBtn}
-          ${productBtn}
+          ${buyBtn}
+        </div>
+      `;
+    }
+
+    function renderHeroActions(itemTitle, sku, productUrl) {
+      const magicBtn = `
+        <button class="btn btn-secondary" type="button" onclick="openMagicBag('${escapeHtml(itemTitle)}', '${escapeHtml(sku)}')">
+          收進魔法袋
+        </button>
+      `;
+
+      const buyBtn = productUrl
+        ? `<a class="btn btn-primary" href="${escapeHtml(productUrl)}" target="_blank" rel="noopener noreferrer">線上直接購買</a>`
+        : "";
+
+      return `
+        <div class="hero-actions">
+          ${magicBtn}
+          ${buyBtn}
         </div>
       `;
     }
@@ -487,13 +615,19 @@
     function renderPage(data) {
       const app = document.getElementById("app");
       const item = data.item;
+      const sku = data.target_sku || DEFAULT_SKU;
       const locations = Array.isArray(item.locations) ? item.locations : [];
       const heroGuide = getHeroGuide(item);
-      const productUrl = PRODUCT_URL_MAP[data.target_sku] || "";
+      const productUrl = PRODUCT_URL_MAP[sku] || "";
 
       const locationHtml = locations.map((loc) => {
         const flavor = getStoreFlavor(loc);
-        const actionsHtml = renderStoreActions(loc, productUrl);
+        const actionsHtml = renderStoreActions(
+          loc,
+          productUrl,
+          item.title,
+          sku
+        );
 
         return `
           <div class="location-card">
@@ -522,20 +656,31 @@
             <div class="hero-total-pill">${escapeHtml(item.total_display_text)}</div>
           </div>
 
+          <div class="hero-meta">
+            <div class="meta-chip">${escapeHtml(item.total_status)}</div>
+            <div class="meta-chip">更新時間：${escapeHtml(data.fetched_at_taipei || "-")}</div>
+          </div>
+
           <div class="guide-box ${escapeHtml(heroGuide.className)}">
             ${escapeHtml(heroGuide.text)}
           </div>
+
+          ${renderHeroActions(item.title, sku, productUrl)}
         </div>
 
         <div class="section">
-          <h2 class="section-title">門市庫存</h2>
+          <div class="section-head">
+            <h2 class="section-title">門市庫存</h2>
+            <div class="section-sub">以目前頁面顯示為準</div>
+          </div>
+
           <div class="location-list">
             ${locationHtml}
           </div>
         </div>
 
         <div class="footer">
-          更新時間：${escapeHtml(data.fetched_at_taipei || "-")}
+          最後查詢時間：${escapeHtml(data.fetched_at_taipei || "-")}
         </div>
       `;
     }
@@ -546,6 +691,7 @@
 
       const cachedData = readCache(sku);
 
+      // 先顯示快取（秒開）
       if (cachedData && cachedData.success && cachedData.item) {
         renderPage(cachedData);
       }
@@ -570,9 +716,14 @@
           return;
         }
 
+        // 背景更新後，如果資料不同就自動刷新
         if (!cachedData || cachedData.fetched_at !== data.fetched_at) {
           writeCache(sku, data);
           renderPage(data);
+
+          if (cachedData) {
+            showUpdateToast("✨ 已更新最新供應狀態");
+          }
         }
       } catch (error) {
         if (!cachedData) {
@@ -586,7 +737,9 @@
       }
     }
 
-    loadStock();
+    document.addEventListener("DOMContentLoaded", () => {
+      loadStock();
+    });
   </script>
 </body>
 </html>
