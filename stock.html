@@ -11,8 +11,6 @@
       --text: #2d2a26;
       --sub: #7a7368;
       --line: #efe4c8;
-      --brand: #f4d35e;
-      --brand-deep: #9a7b12;
       --ok-bg: #edf7ed;
       --ok-text: #2e7d32;
       --low-bg: #fff4e5;
@@ -24,7 +22,6 @@
       --radius-xl: 28px;
       --radius-lg: 22px;
       --radius-md: 18px;
-      --radius-sm: 14px;
     }
 
     * {
@@ -59,7 +56,6 @@
     .brand-chip {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
       background: rgba(255, 236, 157, 0.78);
       color: #7b6207;
       border-radius: 999px;
@@ -132,13 +128,6 @@
       border-color: #f2d1d1;
       background: #fff5f5;
       color: #c03b3b;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
     }
 
     .section {
@@ -245,7 +234,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.12s ease, opacity 0.12s ease;
+      transition: transform 0.12s ease;
     }
 
     .btn:active {
@@ -267,13 +256,6 @@
       background: #fff;
       color: #574d3d;
       border: 1px solid #eadfca;
-    }
-
-    .btn-disabled {
-      background: #f4f1ea;
-      color: #a59b8f;
-      border: 1px solid #ece5d8;
-      cursor: not-allowed;
     }
 
     .footer {
@@ -334,7 +316,6 @@
     const CACHE_TTL_MS = 30 * 1000;
     const CACHE_PREFIX = "durian-stock-cache:";
 
-    // 之後如果你有商品頁網址，填在這裡就會自動顯示「線上購買」
     const PRODUCT_URL_MAP = {
       "DUR-FF-001": "",
       "COL-MR-004": ""
@@ -447,8 +428,7 @@
             data,
           })
         );
-      } catch {
-      }
+      } catch {}
     }
 
     function openMagicBag() {
@@ -476,10 +456,17 @@
       const qty = Number(loc.available) || 0;
       const mapUrl = getMapUrl(loc.location_name);
 
+      const magicBtn = `
+        <button class="btn btn-secondary" type="button" onclick="openMagicBag()">
+          收進魔法袋
+        </button>
+      `;
+
       if (qty <= 0) {
         return `
           <div class="cta-row">
             <a class="btn btn-soft" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener noreferrer">看看門市位置</a>
+            ${magicBtn}
           </div>
         `;
       }
@@ -491,31 +478,8 @@
       return `
         <div class="cta-row">
           <a class="btn btn-primary" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener noreferrer">前往這間門市</a>
-          <button class="btn btn-secondary" type="button" onclick="openMagicBag()">收進魔法袋</button>
-          ${productBtn}
-        </div>
-      `;
-    }
-
-    function renderHeroActions(productUrl, hasStock) {
-      const buyBtn = productUrl
-        ? `<a class="btn btn-primary" href="${escapeHtml(productUrl)}" target="_blank" rel="noopener noreferrer">線上直接購買</a>`
-        : "";
-
-      const magicBtn = `<button class="btn btn-secondary" type="button" onclick="openMagicBag()">收進魔法袋</button>`;
-
-      if (!hasStock) {
-        return `
-          <div class="hero-actions">
-            ${magicBtn}
-          </div>
-        `;
-      }
-
-      return `
-        <div class="hero-actions">
           ${magicBtn}
-          ${buyBtn}
+          ${productBtn}
         </div>
       `;
     }
@@ -526,7 +490,6 @@
       const locations = Array.isArray(item.locations) ? item.locations : [];
       const heroGuide = getHeroGuide(item);
       const productUrl = PRODUCT_URL_MAP[data.target_sku] || "";
-      const hasStock = (Number(item.total_available) || 0) > 0;
 
       const locationHtml = locations.map((loc) => {
         const flavor = getStoreFlavor(loc);
@@ -562,8 +525,6 @@
           <div class="guide-box ${escapeHtml(heroGuide.className)}">
             ${escapeHtml(heroGuide.text)}
           </div>
-
-          ${renderHeroActions(productUrl, hasStock)}
         </div>
 
         <div class="section">
