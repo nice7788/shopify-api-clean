@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>榴槤刺蝟｜榴槤即時供應雷達</title>
 
   <style>
@@ -11,9 +11,7 @@
       --text: #2d2a26;
       --sub: #7a7368;
       --line: #efe4c8;
-
       --hero-bg: linear-gradient(180deg, #fff4bf 0%, #fff9e7 100%);
-
       --shadow: 0 14px 34px rgba(80, 60, 20, 0.08);
 
       --low-bg: #fff5df;
@@ -27,16 +25,19 @@
       --radius-md: 18px;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
-      font-family: -apple-system, "Noto Sans TC", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", sans-serif;
       background:
         radial-gradient(circle at top left, #fff7cf 0%, transparent 30%),
         radial-gradient(circle at top right, #fff2d8 0%, transparent 24%),
         var(--bg);
       color: var(--text);
+      line-height: 1.6;
     }
 
     .wrap {
@@ -67,20 +68,30 @@
       display: flex;
       justify-content: space-between;
       gap: 12px;
+      align-items: flex-start;
     }
 
-    h1 {
+    .hero-title-block {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .hero h1 {
       margin: 0;
-      font-size: 30px;
+      font-size: 32px;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
     }
 
     .hero-sub {
       margin-top: 6px;
       color: var(--sub);
+      font-size: 14px;
     }
 
     .hero-right {
       text-align: right;
+      flex-shrink: 0;
     }
 
     .pill {
@@ -89,14 +100,23 @@
       border-radius: 999px;
       font-weight: 900;
       border: 1px solid #eadfca;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      white-space: nowrap;
+      display: inline-block;
     }
 
     .hero-link {
-      display: block;
+      display: inline-block;
       margin-top: 6px;
       font-size: 13px;
       color: #7b715f;
       text-decoration: none;
+      transition: 0.2s;
+    }
+
+    .hero-link:hover {
+      transform: translateX(3px);
+      color: #000;
     }
 
     .guide {
@@ -115,12 +135,27 @@
       border-radius: var(--radius-lg);
       padding: 18px;
       box-shadow: var(--shadow);
+      border: 1px solid #f1eadc;
     }
 
     .section-head {
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 900;
+      margin: 0;
+    }
+
+    .section-sub {
+      font-size: 12px;
+      color: #999;
+      white-space: nowrap;
     }
 
     .location-card {
@@ -128,17 +163,30 @@
       border-radius: var(--radius-md);
       padding: 16px;
       margin-bottom: 14px;
-      animation: fadeUp 0.4s ease;
+      background: #fffdfa;
+      transition: 0.2s;
     }
 
-    @keyframes fadeUp {
-      from { opacity:0; transform: translateY(6px);}
-      to { opacity:1; transform: translateY(0);}
+    .location-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .location-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
     }
 
     .location-top {
       display: flex;
       justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .location-name {
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.3;
     }
 
     .tag {
@@ -146,6 +194,7 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 900;
+      white-space: nowrap;
     }
 
     .tag.low_stock {
@@ -160,12 +209,14 @@
 
     .stock-main {
       font-weight: 900;
-      margin-top: 6px;
+      font-size: 17px;
+      margin-top: 8px;
     }
 
     .stock-copy {
       color: var(--sub);
       font-size: 14px;
+      margin-top: 2px;
     }
 
     .cta-row {
@@ -182,12 +233,21 @@
       text-decoration: none;
       border: none;
       cursor: pointer;
+      transition: 0.15s;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-primary {
       background: #2d2a26;
       color: #fff;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
     }
 
     .btn-secondary {
@@ -196,10 +256,14 @@
       color: #9a6a00;
     }
 
+    .btn-secondary:hover {
+      background: #fff1cc;
+    }
+
     .btn-soft {
       background: #fff;
       border: 1px solid #eadfca;
-      color: #8a8072;
+      color: #aaa;
     }
 
     .meta {
@@ -214,116 +278,174 @@
       margin-top: 16px;
       color: #8e8578;
     }
+
+    .loading,
+    .error {
+      background: white;
+      border: 1px solid #eee4d4;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 36px 20px;
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .error {
+      color: #b94141;
+    }
+
+    @media (max-width: 640px) {
+      .hero-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-right {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .section-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 28px;
+      }
+
+      .location-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
   </style>
 </head>
 
 <body>
-<div class="wrap">
-  <div id="app">載入中…</div>
-</div>
-
-<script>
-const PRODUCT_URL = "https://nicedurian.com/products/dur-ff-001";
-
-const STORE_MAP = {
-  "花蓮｜美崙起源": "https://maps.app.goo.gl/Kzuxjo7p7Nzf1AB97?g_st=ic",
-  "花蓮｜花創園區": "https://maps.app.goo.gl/LWeLsQ4zJJqStBsk7?g_st=ic"
-};
-
-function goProduct(){
-  window.open(PRODUCT_URL, "_blank");
-}
-
-function getHeroText(item){
-  const locs = item.locations;
-  const available = locs.filter(l=>l.available>0);
-  const sold = locs.filter(l=>l.available<=0);
-
-  if(!available.length) return "今天兩間門市都被吃光光了…";
-
-  if(sold.length){
-    return `${sold.map(s=>s.location_name.replace("花蓮｜","")).join("、")}被吃光了，現在只剩${available.map(a=>a.location_name.replace("花蓮｜","")).join("、")}還有。`;
-  }
-
-  return "今天兩間門市都有貨。";
-}
-
-function render(data){
-  const item = data.item;
-
-  const html = `
-  <div class="hero">
-    <div class="brand-chip">榴槤刺蝟 Nice Durian</div>
-
-    <div class="hero-head">
-      <div>
-        <h1>${item.title}</h1>
-        <div class="hero-sub">榴槤即時供應雷達</div>
-      </div>
-
-      <div class="hero-right">
-        <div class="pill">${item.total_display_text}</div>
-        <a class="hero-link" href="https://nicedurian.com" target="_blank">探索榴槤宇宙 →</a>
-      </div>
+  <div class="wrap">
+    <div id="app">
+      <div class="loading">榴槤供應雷達感應中…</div>
     </div>
-
-    <div class="guide">${getHeroText(item)}</div>
   </div>
 
-  <div class="section">
-    <div class="section-head">
-      <b>魔法商店庫存</b>
-      <span style="font-size:12px;color:#999;">以目前頁面為準</span>
-    </div>
+  <script>
+    const PRODUCT_URL = "https://nicedurian.com/products/dur-ff-001";
 
-    ${item.locations.map(loc=>{
-      const soldOut = loc.available<=0;
+    const STORE_MAP = {
+      "花蓮｜美崙起源": "https://maps.app.goo.gl/Kzuxjo7p7Nzf1AB97?g_st=ic",
+      "花蓮｜花創園區": "https://maps.app.goo.gl/LWeLsQ4zJJqStBsk7?g_st=ic"
+    };
 
-      return `
-      <div class="location-card">
-        <div class="location-top">
-          <b>${loc.location_name}</b>
-          <span class="tag ${loc.status_code}">${loc.status}</span>
+    function goProduct() {
+      window.open(PRODUCT_URL, "_blank", "noopener,noreferrer");
+    }
+
+    function getHeroText(item) {
+      const locs = item.locations || [];
+      const available = locs.filter(l => l.available > 0);
+      const sold = locs.filter(l => l.available <= 0);
+
+      if (!available.length) return "今天兩間門市都被吃光光了…";
+
+      if (sold.length) {
+        return `${sold.map(s => s.location_name.replace("花蓮｜", "")).join("、")}被吃光了，現在只剩${available.map(a => a.location_name.replace("花蓮｜", "")).join("、")}還有。`;
+      }
+
+      return "今天兩間門市都有貨。";
+    }
+
+    function formatUpdatedAt(value) {
+      if (!value) return "-";
+      return String(value).replace("T", " ").replace("+08:00", "");
+    }
+
+    function render(data) {
+      const item = data.item;
+
+      if (!item) {
+        document.getElementById("app").innerHTML = `
+          <div class="error">找不到這顆榴槤，請稍後再試。</div>
+        `;
+        return;
+      }
+
+      document.getElementById("app").innerHTML = `
+        <div class="hero">
+          <div class="brand-chip">榴槤刺蝟 Nice Durian</div>
+
+          <div class="hero-head">
+            <div class="hero-title-block">
+              <h1>${item.title}</h1>
+              <div class="hero-sub">榴槤即時供應雷達</div>
+            </div>
+
+            <div class="hero-right">
+              <div class="pill">${item.total_display_text}</div>
+              <a class="hero-link" href="https://nicedurian.com" target="_blank" rel="noopener noreferrer">探索榴槤宇宙 →</a>
+            </div>
+          </div>
+
+          <div class="guide">${getHeroText(item)}</div>
         </div>
 
-        <div class="stock-main">
-          ${soldOut ? "吃光光了…" : `剩 ${loc.available} 盒`}
+        <div class="section">
+          <div class="section-head">
+            <h2 class="section-title">魔法商店庫存</h2>
+            <span class="section-sub">以目前頁面為準</span>
+          </div>
+
+          ${item.locations.map(loc => {
+            const soldOut = loc.available <= 0;
+
+            return `
+              <div class="location-card">
+                <div class="location-top">
+                  <div class="location-name">${loc.location_name}</div>
+                  <span class="tag ${loc.status_code}">${loc.status}</span>
+                </div>
+
+                <div class="stock-main">
+                  ${soldOut ? "吃光光了…" : `剩 ${loc.available} 盒`}
+                </div>
+
+                <div class="stock-copy">
+                  ${soldOut ? "今天真的被吃光光了…" : "真的快被吃光了。"}
+                </div>
+
+                <div class="cta-row">
+                  ${
+                    soldOut
+                      ? `<a class="btn btn-soft" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">看看門市位置</a>`
+                      : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">前往這間門市</a>`
+                  }
+
+                  <button class="btn btn-secondary" onclick="goProduct()">留一盒給我</button>
+                </div>
+
+                <div class="meta">最後更新：${formatUpdatedAt(loc.updated_at)}</div>
+              </div>
+            `;
+          }).join("")}
         </div>
 
-        <div class="stock-copy">
-          ${soldOut ? "今天真的被吃光光了…" : "真的快被吃光了。"}
+        <div class="footer">
+          最後查詢時間：${data.fetched_at_taipei}
         </div>
-
-        <div class="cta-row">
-          ${
-            soldOut
-            ? `<a class="btn btn-soft" href="${STORE_MAP[loc.location_name]}" target="_blank">看看門市位置</a>`
-            : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank">前往這間門市</a>`
-          }
-
-          <button class="btn btn-secondary" onclick="goProduct()">留一盒給我</button>
-        </div>
-
-        <div class="meta">最後更新：${loc.updated_at.replace("T"," ").replace("+08:00","")}</div>
-      </div>
       `;
-    }).join("")}
-  </div>
+    }
 
-  <div class="footer">
-    最後查詢時間：${data.fetched_at_taipei}
-  </div>
-  `;
-
-  document.getElementById("app").innerHTML = html;
-}
-
-fetch("/.netlify/functions/get-stock")
-.then(r=>r.json())
-.then(render)
-.catch(()=>{
-  document.getElementById("app").innerHTML="讀取失敗";
-});
-</script>
+    fetch("/.netlify/functions/get-stock")
+      .then(r => r.json())
+      .then(render)
+      .catch(() => {
+        document.getElementById("app").innerHTML = `
+          <div class="error">讀取失敗，請稍後再試。</div>
+        `;
+      });
+  </script>
 </body>
 </html>
