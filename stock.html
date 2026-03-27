@@ -1,676 +1,291 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>榴槤刺蝟｜榴槤即時供應雷達</title>
-  <style>
-    :root {
-      --bg: #fffdf8;
-      --card-white: #ffffff;
-      --text: #2d2a26;
-      --sub: #7a7368;
-      --line: #efe4c8;
-      --hero-bg: linear-gradient(180deg, #fff4bf 0%, #fff9e7 100%);
-      --ok-bg: #edf7ed;
-      --ok-text: #2e7d32;
-      --low-bg: #fff4e5;
-      --low-text: #c77800;
-      --out-bg: #fff0f0;
-      --out-text: #c03b3b;
-      --chip-bg: rgba(255,255,255,0.82);
-      --brand-bg: rgba(255, 236, 157, 0.78);
-      --brand-text: #7b6207;
-      --shadow: 0 14px 34px rgba(80, 60, 20, 0.08);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 18px;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>榴槤刺蝟｜榴槤即時供應雷達</title>
 
-    * {
-      box-sizing: border-box;
-    }
+<style>
+:root {
+  --bg: #fffdf8;
+  --card: #ffffff;
+  --text: #2d2a26;
+  --sub: #7a7368;
+  --line: #efe4c8;
+  --hero: linear-gradient(180deg,#fff4bf,#fff9e7);
+  --shadow: 0 14px 34px rgba(80,60,20,0.08);
+}
 
-    html, body {
-      margin: 0;
-      padding: 0;
-    }
+body {
+  margin:0;
+  font-family:-apple-system,"Noto Sans TC",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", sans-serif;
-      background:
-        radial-gradient(circle at top left, #fff7cf 0%, transparent 30%),
-        radial-gradient(circle at top right, #fff2d8 0%, transparent 24%),
-        var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
+.wrap {
+  max-width:720px;
+  margin:auto;
+  padding:20px;
+}
 
-    .wrap {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 22px 16px 44px;
-    }
+/* HERO */
+.hero {
+  background:var(--hero);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:20px;
+  box-shadow:var(--shadow);
+}
 
-    .hero {
-      background: var(--hero-bg);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-xl);
-      padding: 24px 20px 22px;
-      box-shadow: var(--shadow);
-    }
+.hero-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+}
 
-    .brand-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--brand-bg);
-      color: var(--brand-text);
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      margin-bottom: 14px;
-    }
+.hero-title h1 {
+  margin:0;
+  font-size:28px;
+}
 
-    .hero-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
+.hero-sub {
+  color:var(--sub);
+  font-size:14px;
+  margin-top:6px;
+}
 
-    .hero-title-wrap {
-      min-width: 0;
-      flex: 1;
-    }
+/* 右上區 */
+.hero-right {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+}
 
-    .hero h1 {
-      margin: 0;
-      font-size: 31px;
-      line-height: 1.2;
-      letter-spacing: 0.01em;
-    }
+.total-pill {
+  background:#fff;
+  padding:8px 14px;
+  border-radius:999px;
+  font-weight:800;
+  border:1px solid #eadfca;
+}
 
-    .hero-sub {
-      margin-top: 8px;
-      color: var(--sub);
-      font-size: 15px;
-    }
+/* 探索宇宙（低干擾） */
+.hero-link {
+  font-size:13px;
+  color:#7a6b4a;
+  text-decoration:none;
+}
 
-    .hero-total-pill {
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      min-height: 46px;
-      padding: 10px 16px;
-      background: var(--chip-bg);
-      border: 1px solid #eadfca;
-      border-radius: 999px;
-      font-size: 15px;
-      font-weight: 900;
-      box-shadow: 0 4px 14px rgba(120, 100, 40, 0.04);
-      white-space: nowrap;
-      margin-top: 4px;
-    }
+.hero-link:hover {
+  text-decoration:underline;
+}
 
-    .guide-box {
-      margin-top: 16px;
-      border-radius: 18px;
-      padding: 14px 16px;
-      font-size: 15px;
-      font-weight: 800;
-      border: 1px solid #efd7a8;
-      background: #fff7e8;
-      color: #b86e00;
-    }
+/* 提示框 */
+.guide {
+  margin-top:14px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:#fff7e8;
+  border:1px solid #efd7a8;
+  font-size:14px;
+  font-weight:700;
+}
 
-    .guide-box.success {
-      border-color: #d8ebd8;
-      background: #f4fbf4;
-      color: #2e7d32;
-    }
+/* SECTION */
+.section {
+  margin-top:18px;
+  background:#fff;
+  border-radius:20px;
+  padding:18px;
+  border:1px solid #eee;
+  box-shadow:var(--shadow);
+}
 
-    .guide-box.out {
-      border-color: #f2d1d1;
-      background: #fff5f5;
-      color: #c03b3b;
-    }
+.section-head {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
 
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
+.section-title {
+  font-weight:900;
+}
 
-    .section {
-      margin-top: 18px;
-      background: var(--card-white);
-      border: 1px solid #eee6d8;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
-      padding: 20px 16px;
-    }
+/* 卡片 */
+.card {
+  border:1px solid #eee;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:12px;
+}
 
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
+.card-top {
+  display:flex;
+  justify-content:space-between;
+}
 
-    .section-title {
-      margin: 0;
-      font-size: 17px;
-      font-weight: 900;
-      letter-spacing: 0.02em;
-    }
+.tag {
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#fff4e5;
+}
 
-    .section-sub {
-      font-size: 12px;
-      color: #8e8578;
-      white-space: nowrap;
-    }
+.stock-main {
+  font-weight:900;
+  margin-top:6px;
+}
 
-    .location-list {
-      display: grid;
-      gap: 14px;
-    }
+.stock-sub {
+  font-size:13px;
+  color:var(--sub);
+}
 
-    .location-card {
-      border: 1px solid #eee4d4;
-      border-radius: var(--radius-md);
-      background: #fffdfa;
-      padding: 16px;
-    }
+/* 按鈕 */
+.actions {
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
 
-    .location-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
+.btn {
+  padding:10px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:800;
+  text-decoration:none;
+}
 
-    .location-name {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 900;
-      line-height: 1.3;
-    }
+.btn-primary {
+  background:#2d2a26;
+  color:white;
+}
 
-    .tag {
-      flex-shrink: 0;
-      border-radius: 999px;
-      padding: 7px 12px;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 0.02em;
-    }
+.btn-soft {
+  background:#fff7e8;
+  border:1px solid #efd7a8;
+  color:#9a6a00;
+}
 
-    .tag.in_stock {
-      background: var(--ok-bg);
-      color: var(--ok-text);
-    }
-
-    .tag.low_stock {
-      background: var(--low-bg);
-      color: var(--low-text);
-    }
-
-    .tag.out_of_stock {
-      background: var(--out-bg);
-      color: var(--out-text);
-    }
-
-    .stock-main {
-      font-size: 17px;
-      font-weight: 900;
-      margin: 8px 0 2px;
-    }
-
-    .stock-copy {
-      font-size: 14px;
-      color: var(--sub);
-      margin: 0;
-    }
-
-    .cta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .btn {
-      appearance: none;
-      border: none;
-      border-radius: 999px;
-      padding: 11px 16px;
-      font-size: 14px;
-      font-weight: 900;
-      text-decoration: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.12s ease, opacity 0.12s ease;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn-primary {
-      background: #2d2a26;
-      color: #ffffff;
-    }
-
-    .btn-secondary {
-      background: #fff7e8;
-      color: #9a6a00;
-      border: 1px solid #efd7a8;
-    }
-
-    .btn-soft {
-      background: #fff;
-      color: #574d3d;
-      border: 1px solid #eadfca;
-    }
-
-    .meta {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #938b80;
-    }
-
-    .footer {
-      margin-top: 18px;
-      text-align: center;
-      font-size: 12px;
-      color: #8e8578;
-      line-height: 1.8;
-    }
-
-    .loading,
-    .error {
-      background: white;
-      border: 1px solid #eee4d4;
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 36px 20px;
-      text-align: center;
-      margin-top: 24px;
-    }
-
-    .error {
-      color: #b94141;
-    }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%);
-      background: rgba(45, 42, 38, 0.94);
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 800;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      z-index: 999;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    @media (max-width: 640px) {
-      .hero-head {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .hero-total-pill {
-        margin-top: 0;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .section-head {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .hero h1 {
-        font-size: 28px;
-      }
-
-      .location-top {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-  </style>
+/* footer */
+.footer {
+  text-align:center;
+  font-size:12px;
+  margin-top:14px;
+  color:#8e8578;
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div id="app">
-      <div class="loading">榴槤供應雷達感應中…</div>
+<div class="wrap">
+  <div id="app">載入中…</div>
+</div>
+
+<script>
+const PRODUCT_URL = "https://nicedurian.com/products/dur-ff-001";
+const HOME_URL = "https://nicedurian.com";
+
+const STORE_MAP = {
+  "花蓮｜美崙起源":"https://maps.app.goo.gl/Kzuxjo7p7Nzf1AB97?g_st=ic",
+  "花蓮｜花創園區":"https://maps.app.goo.gl/LWeLsQ4zJJqStBsk7?g_st=ic"
+};
+
+function render(data){
+  const item = data.item;
+  const guide = getGuide(item);
+
+  document.getElementById("app").innerHTML = `
+  
+  <div class="hero">
+    <div class="hero-head">
+      
+      <div class="hero-title">
+        <h1>${item.title}</h1>
+        <div class="hero-sub">榴槤即時供應雷達</div>
+      </div>
+
+      <div class="hero-right">
+        <div class="total-pill">${item.total_display_text}</div>
+        <a class="hero-link" href="${HOME_URL}" target="_blank">
+          探索榴槤宇宙 →
+        </a>
+      </div>
+
     </div>
+
+    <div class="guide">${guide}</div>
   </div>
 
-  <div id="update-toast" class="toast">✨ 已更新最新供應狀態</div>
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">魔法商店庫存</div>
+      <div style="font-size:12px;color:#aaa;">以目前頁面為準</div>
+    </div>
 
-  <script>
-    const DEFAULT_SKU = "DUR-FF-001";
-    const CACHE_TTL_MS = 30 * 1000;
-    const CACHE_PREFIX = "durian-stock-cache:";
+    ${item.locations.map(loc => renderCard(loc)).join("")}
+  </div>
 
-    const PRODUCT_URL_MAP = {
-      "DUR-FF-001": "https://nicedurian.com/products/dur-ff-001",
-      "COL-MR-004": ""
-    };
+  <div class="footer">
+    最後查詢時間：${data.fetched_at_taipei}
+  </div>
+  `;
+}
 
-    const STORE_URL_MAP = {
-      "花蓮｜美崙起源": "https://maps.app.goo.gl/Kzuxjo7p7Nzf1AB97?g_st=ic",
-      "花蓮｜花創園區": "https://maps.app.goo.gl/LWeLsQ4zJJqStBsk7?g_st=ic"
-    };
+function renderCard(loc){
+  const qty = loc.available;
+  const map = STORE_MAP[loc.location_name];
 
-    const HOME_URL = "https://nicedurian.com";
+  let text = qty > 0 ? `剩 ${qty} 盒` : "吃光光了…";
+  let sub = qty > 0 ? "真的快被吃光了。" : "今天真的被吃光光了…";
 
-    function getQueryParam(name) {
-      const url = new URL(window.location.href);
-      return url.searchParams.get(name);
-    }
+  return `
+  <div class="card">
+    <div class="card-top">
+      <strong>${loc.location_name}</strong>
+      <span class="tag">${loc.status}</span>
+    </div>
 
-    function escapeHtml(str) {
-      return String(str ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
+    <div class="stock-main">${text}</div>
+    <div class="stock-sub">${sub}</div>
 
-    function formatDisplayTime(raw) {
-      if (!raw) return "-";
-      return String(raw)
-        .replace("T", " ")
-        .replace("+08:00", "")
-        .replace("Z", "");
-    }
+    <div class="actions">
+      <a class="btn btn-primary" href="${map}" target="_blank">
+        前往這間門市
+      </a>
 
-    function getStoreFlavor(loc) {
-      const qty = Number(loc.available) || 0;
+      <a class="btn btn-soft" href="${PRODUCT_URL}" target="_blank">
+        留一盒給我
+      </a>
+    </div>
+  </div>
+  `;
+}
 
-      if (qty <= 0) {
-        return {
-          title: "吃光光了…",
-          sub: "今天真的被吃光光了…",
-        };
-      }
+function getGuide(item){
+  const locs = item.locations;
+  const available = locs.filter(l=>l.available>0);
+  const sold = locs.filter(l=>l.available<=0);
 
-      if (qty <= 3) {
-        return {
-          title: `剩 ${qty} 盒`,
-          sub: "真的快被吃光了。",
-        };
-      }
+  if(available.length===0){
+    return "今天全部被吃光了…";
+  }
 
-      return {
-        title: `剩 ${qty} 盒`,
-        sub: "還買得到，可以放心衝。",
-      };
-    }
+  if(sold.length>0){
+    return `⚠ ${sold.map(s=>s.location_name).join("、")} 被吃光了，現在只剩 ${available.map(a=>a.location_name).join("、")} 還有。`;
+  }
 
-    function getHeroGuide(item) {
-      const locations = Array.isArray(item.locations) ? item.locations : [];
-      const availableStores = locations.filter((loc) => (Number(loc.available) || 0) > 0);
-      const soldOutStores = locations.filter((loc) => (Number(loc.available) || 0) <= 0);
+  return "今天都有貨，可以放心前往。";
+}
 
-      if (availableStores.length === 0) {
-        return {
-          className: "out",
-          text: "今天兩間門市都被吃光光了…",
-        };
-      }
+fetch('/.netlify/functions/get-stock')
+.then(r=>r.json())
+.then(render)
+.catch(()=>{document.getElementById("app").innerHTML="載入失敗";});
+</script>
 
-      if (soldOutStores.length > 0 && availableStores.length > 0) {
-        const availableNames = availableStores.map((loc) =>
-          loc.location_name.replace("花蓮｜", "")
-        );
-        const soldOutNames = soldOutStores.map((loc) =>
-          loc.location_name.replace("花蓮｜", "")
-        );
-
-        return {
-          className: "",
-          text: `⚠ ${soldOutNames.join("、")} 被吃光了，現在只剩 ${availableNames.join("、")} 還有。`,
-        };
-      }
-
-      return {
-        className: "success",
-        text: "今天兩間門市都有貨，可以選離你比較近的地方。",
-      };
-    }
-
-    function getCacheKey(sku) {
-      return `${CACHE_PREFIX}${sku}`;
-    }
-
-    function readCache(sku) {
-      try {
-        const raw = localStorage.getItem(getCacheKey(sku));
-        if (!raw) return null;
-
-        const parsed = JSON.parse(raw);
-        if (!parsed || !parsed.savedAt || !parsed.data) return null;
-
-        const age = Date.now() - parsed.savedAt;
-        if (age > CACHE_TTL_MS) return null;
-
-        return parsed.data;
-      } catch {
-        return null;
-      }
-    }
-
-    function writeCache(sku, data) {
-      try {
-        localStorage.setItem(
-          getCacheKey(sku),
-          JSON.stringify({
-            savedAt: Date.now(),
-            data,
-          })
-        );
-      } catch {}
-    }
-
-    function showUpdateToast(text = "✨ 已更新最新供應狀態") {
-      const el = document.getElementById("update-toast");
-      if (!el) return;
-
-      el.textContent = text;
-      el.classList.add("show");
-
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => {
-        el.classList.remove("show");
-      }, 2200);
-    }
-
-    function goToProductPage(sku) {
-      const url = PRODUCT_URL_MAP[sku] || HOME_URL;
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-
-    function getStoreUrl(locationName) {
-      return STORE_URL_MAP[locationName] || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`;
-    }
-
-    function renderStoreActions(loc, sku) {
-      const qty = Number(loc.available) || 0;
-      const storeUrl = getStoreUrl(loc.location_name);
-
-      const magicBtn = `
-        <button class="btn btn-secondary" type="button" onclick="goToProductPage('${escapeHtml(sku)}')">
-          收進魔法袋
-        </button>
-      `;
-
-      if (qty <= 0) {
-        return `
-          <div class="cta-row">
-            <a class="btn btn-soft" href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer">看看門市位置</a>
-            ${magicBtn}
-          </div>
-        `;
-      }
-
-      return `
-        <div class="cta-row">
-          <a class="btn btn-primary" href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer">前往這間門市</a>
-          ${magicBtn}
-        </div>
-      `;
-    }
-
-    function renderHeroActions() {
-      return `
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="${escapeHtml(HOME_URL)}" target="_blank" rel="noopener noreferrer">探索榴槤宇宙</a>
-        </div>
-      `;
-    }
-
-    function renderPage(data) {
-      const app = document.getElementById("app");
-      const item = data.item;
-      const sku = data.target_sku || DEFAULT_SKU;
-      const locations = Array.isArray(item.locations) ? item.locations : [];
-      const heroGuide = getHeroGuide(item);
-
-      const locationHtml = locations.map((loc) => {
-        const flavor = getStoreFlavor(loc);
-        const actionsHtml = renderStoreActions(loc, sku);
-
-        return `
-          <div class="location-card">
-            <div class="location-top">
-              <h3 class="location-name">${escapeHtml(loc.location_name)}</h3>
-              <span class="tag ${escapeHtml(loc.status_code)}">${escapeHtml(loc.status)}</span>
-            </div>
-            <div class="stock-main">${escapeHtml(flavor.title)}</div>
-            <p class="stock-copy">${escapeHtml(flavor.sub)}</p>
-            ${actionsHtml}
-            <div class="meta">最後更新：${escapeHtml(formatDisplayTime(loc.updated_at || "-"))}</div>
-          </div>
-        `;
-      }).join("");
-
-      app.innerHTML = `
-        <div class="hero">
-          <div class="brand-chip">榴槤刺蝟 Nice Durian</div>
-
-          <div class="hero-head">
-            <div class="hero-title-wrap">
-              <h1>${escapeHtml(item.title)}</h1>
-              <div class="hero-sub">榴槤即時供應雷達</div>
-            </div>
-
-            <div class="hero-total-pill">${escapeHtml(item.total_display_text)}</div>
-          </div>
-
-          <div class="guide-box ${escapeHtml(heroGuide.className)}">
-            ${escapeHtml(heroGuide.text)}
-          </div>
-
-          ${renderHeroActions()}
-        </div>
-
-        <div class="section">
-          <div class="section-head">
-            <h2 class="section-title">門市庫存</h2>
-            <div class="section-sub">以目前頁面顯示為準</div>
-          </div>
-
-          <div class="location-list">
-            ${locationHtml}
-          </div>
-        </div>
-
-        <div class="footer">
-          最後查詢時間：${escapeHtml(data.fetched_at_taipei || "-")}
-        </div>
-      `;
-    }
-
-    async function loadStock() {
-      const app = document.getElementById("app");
-      const sku = getQueryParam("sku") || DEFAULT_SKU;
-
-      const cachedData = readCache(sku);
-
-      if (cachedData && cachedData.success && cachedData.item) {
-        renderPage(cachedData);
-      }
-
-      try {
-        const res = await fetch(`/.netlify/functions/get-stock?sku=${encodeURIComponent(sku)}`, {
-          method: "GET",
-          cache: "no-store",
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.success || !data.item) {
-          if (!cachedData) {
-            app.innerHTML = `
-              <div class="error">
-                今天還感應不到這顆榴槤。<br>
-                請稍後再試一次。
-              </div>
-            `;
-          }
-          return;
-        }
-
-        if (!cachedData || cachedData.fetched_at !== data.fetched_at) {
-          writeCache(sku, data);
-          renderPage(data);
-
-          if (cachedData) {
-            showUpdateToast("✨ 已更新最新供應狀態");
-          }
-        }
-      } catch (error) {
-        if (!cachedData) {
-          app.innerHTML = `
-            <div class="error">
-              供應雷達暫時失靈，請稍後再試。<br>
-              ${escapeHtml(error.message)}
-            </div>
-          `;
-        }
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      loadStock();
-    });
-  </script>
 </body>
 </html>
