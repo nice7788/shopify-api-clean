@@ -361,26 +361,25 @@
 
     function openLineMessage(locationName, productTitle) {
       const shortLocation = locationName.replace("花蓮｜", "");
-      const message = `我想購買【${productTitle}】
+      const message = `嗨，我想購買【${productTitle}】
 
-門市：${shortLocation}
-數量：X盒
+想取貨門市：${shortLocation}
+想要數量：X盒
 
-目前已售完，想先登記補貨通知 🙏
-如果補貨，請優先通知我，謝謝！`;
+看到這間今天被吃光光了🥲
+如果這間一補貨，想請你先叫我，謝謝！`;
 
       const url = `https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(message)}`;
       window.open(url, "_blank", "noopener,noreferrer");
     }
 
     function openGeneralLineMessage(productTitle) {
-      const message = `我想購買【${productTitle}】
+      const message = `嗨，我想購買【${productTitle}】
 
-數量：X盒
+想要數量：X盒
 
-看到目前已經被搶光了🥲
-想先登記下一批補貨通知 🙏
-如果可以，請優先通知我，謝謝！`;
+看到今天整體都被搶光了🥲
+如果下一批出現，想請你先叫我，謝謝！`;
 
       const url = `https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(message)}`;
       window.open(url, "_blank", "noopener,noreferrer");
@@ -412,7 +411,7 @@
 
       return `
         <div class="hero-actions">
-          <button class="btn btn-primary" onclick="openGeneralLineMessage('${item.title}')">補貨叫我</button>
+          <button class="btn btn-primary" onclick="openGeneralLineMessage('${item.title}')">下次先叫我</button>
           <a class="btn btn-secondary" href="${HOME_URL}" target="_blank" rel="noopener noreferrer">探索榴槤宇宙</a>
         </div>
       `;
@@ -489,7 +488,7 @@
                   ${
                     soldOut
                       ? `<a class="btn btn-soft" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">${getStoreButtonText(loc.location_name, true)}</a>
-                         <button class="btn btn-secondary" onclick="openLineMessage('${loc.location_name}', '${item.title}')">補貨通知我</button>`
+                         <button class="btn btn-secondary" onclick="openLineMessage('${loc.location_name}', '${item.title}')">這間有貨先叫我</button>`
                       : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">${getStoreButtonText(loc.location_name, false)}</a>
                          <button class="btn btn-secondary" onclick="goProduct()">留一盒給我</button>`
                   }
