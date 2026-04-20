@@ -346,23 +346,44 @@
   </div>
 
   <script>
-    const PRODUCT_URL = "https://nicedurian.com/products/dur-ff-001";
-    const HOME_URL = "http://durian.com.tw";
+    const PRODUCT_URL = "https://iding.tw/store/7d146249";
+    const HOME_URL = "https://iding.tw/store/7d146249";
+    const LINE_OA_ID = "@nicedurian";
 
     const STORE_MAP = {
       "花蓮｜美崙起源": "https://maps.app.goo.gl/Kzuxjo7p7Nzf1AB97?g_st=ic",
       "花蓮｜花創園區": "https://cdn.shopify.com/s/files/1/0738/2040/5954/files/IMG_7665.jpg?v=1776689093"
     };
 
-    // 之後若你有更精準的 LIFF / 官方 LINE 對話連結，只要改這裡
-    const LINE_NOTIFY_URL = "https://line.me/R/ti/p/@nicedurian";
-
     function goProduct() {
       window.open(PRODUCT_URL, "_blank", "noopener,noreferrer");
     }
 
-    function goLineNotify() {
-      window.open(LINE_NOTIFY_URL, "_blank", "noopener,noreferrer");
+    function openLineMessage(locationName, productTitle) {
+      const shortLocation = locationName.replace("花蓮｜", "");
+      const message = `我想購買【${productTitle}】
+
+門市：${shortLocation}
+數量：X盒
+
+目前已售完，想先登記補貨通知 🙏
+如果補貨，請優先通知我，謝謝！`;
+
+      const url = `https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(message)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function openGeneralLineMessage(productTitle) {
+      const message = `我想購買【${productTitle}】
+
+數量：X盒
+
+看到目前已經被搶光了🥲
+想先登記下一批補貨通知 🙏
+如果可以，請優先通知我，謝謝！`;
+
+      const url = `https://line.me/R/oaMessage/${LINE_OA_ID}/?${encodeURIComponent(message)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
     }
 
     function getHeroText(item) {
@@ -386,15 +407,22 @@
       return String(value).replace("T", " ").replace("+08:00", "");
     }
 
-    function renderHeroActions(allSoldOut) {
+    function renderHeroActions(allSoldOut, item) {
       if (!allSoldOut) return "";
 
       return `
         <div class="hero-actions">
-          <button class="btn btn-primary" onclick="goLineNotify()">補貨叫我</button>
+          <button class="btn btn-primary" onclick="openGeneralLineMessage('${item.title}')">補貨叫我</button>
           <a class="btn btn-secondary" href="${HOME_URL}" target="_blank" rel="noopener noreferrer">探索榴槤宇宙</a>
         </div>
       `;
+    }
+
+    function getStoreButtonText(locationName, soldOut) {
+      if (locationName === "花蓮｜花創園區") {
+        return "看看門市照片";
+      }
+      return soldOut ? "看看門市位置" : "前往這間門市";
     }
 
     function render(data) {
@@ -430,7 +458,7 @@
             ${getHeroText(item)}
           </div>
 
-          ${renderHeroActions(allSoldOut)}
+          ${renderHeroActions(allSoldOut, item)}
         </div>
 
         <div class="section">
@@ -460,9 +488,9 @@
                 <div class="cta-row">
                   ${
                     soldOut
-                      ? `<a class="btn btn-soft" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">看看門市位置</a>
-                         <button class="btn btn-secondary" onclick="goLineNotify()">補貨通知我</button>`
-                      : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">前往這間門市</a>
+                      ? `<a class="btn btn-soft" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">${getStoreButtonText(loc.location_name, true)}</a>
+                         <button class="btn btn-secondary" onclick="openLineMessage('${loc.location_name}', '${item.title}')">補貨通知我</button>`
+                      : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">${getStoreButtonText(loc.location_name, false)}</a>
                          <button class="btn btn-secondary" onclick="goProduct()">留一盒給我</button>`
                   }
                 </div>
