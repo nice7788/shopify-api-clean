@@ -129,6 +129,19 @@
       color: #b86e00;
     }
 
+    .guide.out {
+      background: #fff4f1;
+      border-color: #f1d5d5;
+      color: #b45a4a;
+    }
+
+    .hero-actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .section {
       margin-top: 18px;
       background: #fff;
@@ -334,14 +347,22 @@
 
   <script>
     const PRODUCT_URL = "https://nicedurian.com/products/dur-ff-001";
+    const HOME_URL = "https://nicedurian.com";
 
     const STORE_MAP = {
       "花蓮｜美崙起源": "https://maps.app.goo.gl/Kzuxjo7p7Nzf1AB97?g_st=ic",
       "花蓮｜花創園區": "https://maps.app.goo.gl/LWeLsQ4zJJqStBsk7?g_st=ic"
     };
 
+    // 之後若你有更精準的 LIFF / 官方 LINE 對話連結，只要改這裡
+    const LINE_NOTIFY_URL = "https://line.me/R/ti/p/@nicedurian";
+
     function goProduct() {
       window.open(PRODUCT_URL, "_blank", "noopener,noreferrer");
+    }
+
+    function goLineNotify() {
+      window.open(LINE_NOTIFY_URL, "_blank", "noopener,noreferrer");
     }
 
     function getHeroText(item) {
@@ -349,7 +370,9 @@
       const available = locs.filter(l => l.available > 0);
       const sold = locs.filter(l => l.available <= 0);
 
-      if (!available.length) return "今天兩間門市都被吃光光了…";
+      if (!available.length) {
+        return "今天被搶光了…但下一批很快就會出現 👀";
+      }
 
       if (sold.length) {
         return `${sold.map(s => s.location_name.replace("花蓮｜", "")).join("、")}被吃光了，現在只剩${available.map(a => a.location_name.replace("花蓮｜", "")).join("、")}還有。`;
@@ -363,6 +386,17 @@
       return String(value).replace("T", " ").replace("+08:00", "");
     }
 
+    function renderHeroActions(allSoldOut) {
+      if (!allSoldOut) return "";
+
+      return `
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="goLineNotify()">補貨叫我</button>
+          <a class="btn btn-secondary" href="${HOME_URL}" target="_blank" rel="noopener noreferrer">探索榴槤宇宙</a>
+        </div>
+      `;
+    }
+
     function render(data) {
       const item = data.item;
 
@@ -372,6 +406,9 @@
         `;
         return;
       }
+
+      const locations = item.locations || [];
+      const allSoldOut = locations.length > 0 && locations.every(loc => loc.available <= 0);
 
       document.getElementById("app").innerHTML = `
         <div class="hero">
@@ -385,11 +422,15 @@
 
             <div class="hero-right">
               <div class="pill">${item.total_display_text}</div>
-              <a class="hero-link" href="https://nicedurian.com" target="_blank" rel="noopener noreferrer">探索榴槤宇宙 →</a>
+              ${!allSoldOut ? `<a class="hero-link" href="${HOME_URL}" target="_blank" rel="noopener noreferrer">探索榴槤宇宙 →</a>` : ""}
             </div>
           </div>
 
-          <div class="guide">${getHeroText(item)}</div>
+          <div class="guide ${allSoldOut ? "out" : ""}">
+            ${getHeroText(item)}
+          </div>
+
+          ${renderHeroActions(allSoldOut)}
         </div>
 
         <div class="section">
@@ -398,7 +439,7 @@
             <span class="section-sub">以目前頁面為準</span>
           </div>
 
-          ${item.locations.map(loc => {
+          ${locations.map(loc => {
             const soldOut = loc.available <= 0;
 
             return `
@@ -419,11 +460,11 @@
                 <div class="cta-row">
                   ${
                     soldOut
-                      ? `<a class="btn btn-soft" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">看看門市位置</a>`
-                      : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">前往這間門市</a>`
+                      ? `<a class="btn btn-soft" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">看看門市位置</a>
+                         <button class="btn btn-secondary" onclick="goLineNotify()">補貨通知我</button>`
+                      : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">前往這間門市</a>
+                         <button class="btn btn-secondary" onclick="goProduct()">留一盒給我</button>`
                   }
-
-                  <button class="btn btn-secondary" onclick="goProduct()">留一盒給我</button>
                 </div>
 
                 <div class="meta">最後更新：${formatUpdatedAt(loc.updated_at)}</div>
