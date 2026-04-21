@@ -14,6 +14,9 @@
       --hero-bg: linear-gradient(180deg, #fff4bf 0%, #fff9e7 100%);
       --shadow: 0 14px 34px rgba(80, 60, 20, 0.08);
 
+      --in-bg: #edf7ed;
+      --in-text: #2e7d32;
+
       --low-bg: #fff5df;
       --low-text: #cc8a00;
 
@@ -210,6 +213,11 @@
       white-space: nowrap;
     }
 
+    .tag.in_stock {
+      background: var(--in-bg);
+      color: var(--in-text);
+    }
+
     .tag.low_stock {
       background: var(--low-bg);
       color: var(--low-text);
@@ -355,10 +363,6 @@
       "花蓮｜花創園區": "https://cdn.shopify.com/s/files/1/0738/2040/5954/files/IMG_7665.jpg?v=1776689093"
     };
 
-    function goProduct() {
-      window.open(PRODUCT_URL, "_blank", "noopener,noreferrer");
-    }
-
     function openLineMessage(locationName, productTitle) {
       const shortLocation = locationName.replace("花蓮｜", "");
       const message = `嗨，我想購買【${productTitle}】
@@ -419,7 +423,7 @@
 
     function getStoreButtonText(locationName, soldOut) {
       if (locationName === "花蓮｜花創園區") {
-        return "看看門市照片";
+        return soldOut ? "看看門市照片" : "看看門市照片";
       }
       return soldOut ? "看看門市位置" : "前往這間門市";
     }
@@ -489,8 +493,7 @@
                     soldOut
                       ? `<a class="btn btn-soft" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">${getStoreButtonText(loc.location_name, true)}</a>
                          <button class="btn btn-secondary" onclick="openLineMessage('${loc.location_name}', '${item.title}')">這間有貨先叫我</button>`
-                      : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">${getStoreButtonText(loc.location_name, false)}</a>
-                         <button class="btn btn-secondary" onclick="goProduct()">留一盒給我</button>`
+                      : `<a class="btn btn-primary" href="${STORE_MAP[loc.location_name]}" target="_blank" rel="noopener noreferrer">${getStoreButtonText(loc.location_name, false)}</a>`
                   }
                 </div>
 
